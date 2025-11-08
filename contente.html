@@ -1,0 +1,2445 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Système de Gestion de Présence Avancé - V3.4 (Tri Unifié)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<style>
+/* --- 1. Global & Bold Minimalism Base Styles (Updated Colors) --- */
+body { 
+    font-family: 'Arial', sans-serif; 
+    background-color: #F8F8F8; 
+    color: #333333; 
+    margin: 0; padding: 0; padding-bottom: 70px; 
+    text-align: left; 
+}
+header { 
+    background-color: #D62828; 
+    color: white; 
+    text-align: center; 
+    padding: 1.5rem 1rem; 
+    font-size: 1.8rem; font-weight: bold; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
+    position: relative; 
+}
+
+main { padding: 30px 20px; max-width: 1000px; margin: 0 auto; } 
+h2 { 
+    color: #D62828; 
+    border-bottom: 1.5px solid #e0e0e0; 
+    padding-bottom: 8px; margin-top: 30px; 
+    font-size: 1.6rem; 
+    font-weight: 700;
+}
+h3 { 
+    color: #007bff; 
+    border-left: 5px solid #007bff; 
+    padding-left: 10px; margin-top: 25px; 
+    font-size: 1.3rem; 
+}
+.tab-content-card { 
+    background-color: white; 
+    padding: 25px; 
+    margin-bottom: 30px; 
+    border-radius: 12px; 
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); 
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.hidden { display: none !important; }
+
+/* Fixed Bottom Navigation */
+.tab-navigation {
+    position: fixed; bottom: 0; left: 0; width: 100%; 
+    background-color: #ffffff;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1); 
+    display: flex;
+    justify-content: space-around; padding: 5px 0; z-index: 1000; 
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+.tab-button {
+    flex-grow: 1; border: none; background: none; cursor: pointer; padding: 8px 5px; 
+    font-size: 0.75rem; color: #6c757d; transition: color 0.3s, font-weight 0.3s;
+    display: flex; flex-direction: column; align-items: center; line-height: 1.1;
+    white-space: nowrap; text-overflow: ellipsis; overflow: hidden;
+}
+.tab-button i { font-size: 1.4rem; margin-bottom: 3px; }
+.tab-button.active { color: #D62828; font-weight: bold; } 
+
+/* Form Elements */
+input, select, textarea { 
+    width: 100%; padding: 12px; margin: 10px 0; 
+    font-size: 1rem; border: 1px solid #e0e0e0; 
+    border-radius: 8px; box-sizing: border-box; 
+    transition: border-color 0.3s, background-color 0.3s, color 0.3s; 
+    background-color: white; 
+    color: #333333; 
+}
+input:focus, select:focus, textarea:focus { border-color: #D62828; outline: none; }
+/* Style pour le Select Multiple - HIDDEN NOW */
+#registerQuickWorkerSelect[multiple] { 
+    display: none !important; 
+}
+
+button:not(.tab-button) { 
+    background-color:#D62828; 
+    color:white; border:none; cursor:pointer; 
+    padding: 12px 15px; margin: 8px 0; 
+    border-radius: 8px; width: 100%; 
+    font-weight: bold; 
+    transition: background-color 0.3s, transform 0.1s; 
+}
+button:not(.tab-button):hover { background-color: #a31a1a; transform: translateY(-1px); }
+
+/* Specific Button Colors */
+#registerButton, button[onclick*="registerPresence()"] { background-color: #D62828; }
+button[onclick*="quickPunch('in')"] { background-color: #4CAF50; } 
+button[onclick*="quickPunch('out')"] { background-color: #FFC107; color: #333;} 
+button[onclick*="registerPlannedAbsence()"] { background-color: #dc3545; }
+button[onclick*="addHoliday()"] { background-color: #007bff; }
+button[onclick*="exportDataToExcel()"] { background-color: #1e7e34; }
+button[onclick*="saveWorkerProfile()"] { background-color: #4CAF50; }
+/* Style pour le bouton Supprimer (icône) */
+.delete-btn { 
+    background-color: #dc3545 !important; 
+    padding: 3px 8px !important; 
+    width: auto !important;
+    margin: 0 !important;
+    margin-left: 5px !important;
+}
+.delete-btn:hover { background-color: #c82333 !important; }
+
+.input-group { display: flex; gap: 20px; margin-bottom: 15px; flex-wrap: wrap; }
+.input-group > div { flex: 1; min-width: 180px; } 
+
+/* --- CUSTOM SELECT DROPDOWN STYLES (RED Button) --- */
+.custom-select-container {
+    position: relative;
+    width: 100%;
+    margin: 10px 0;
+}
+.custom-select-button { 
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #D62828; 
+    border-radius: 8px;
+    text-align: left;
+    background-color: #D62828; 
+    color: white; 
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.3s, box-shadow 0.3s, transform 0.1s;
+    font-weight: bold; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
+}
+.custom-select-button i {
+    color: white; 
+    transition: transform 0.2s;
+}
+.custom-select-button:focus, .custom-select-button:hover { 
+    background-color: #a31a1a; 
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); 
+    transform: translateY(-2px); 
+    outline: none; 
+}
+
+.custom-select-button.active {
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-color: #D62828;
+    background-color: #a31a1a; 
+    transform: none;
+    box-shadow: none; 
+}
+.custom-select-button.active i {
+    transform: rotate(180deg); 
+}
+
+.custom-select-dropdown { 
+    position: absolute;
+    width: 100%;
+    max-height: 350px; 
+    overflow-y: auto;
+    border: 1px solid #D62828;
+    border-top: none;
+    border-bottom-left-radius: 12px; 
+    border-bottom-right-radius: 12px;
+    background-color: white;
+    z-index: 10;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25); 
+    padding: 5px 0; 
+}
+.dropdown-item-label {
+    display: flex;
+    align-items: center;
+    padding: 12px 18px; 
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 1rem; 
+}
+.dropdown-item-label:hover {
+    background-color: #f5f5f5; 
+}
+.dropdown-item-label.selected {
+    background-color: #ffebee; 
+    font-weight: bold;
+    color: #D62828; 
+    border-left: 4px solid #D62828; 
+}
+.dropdown-item-label.selected:hover {
+    background-color: #ffdddd; 
+}
+/* --- END CUSTOM SELECT DROPDOWN STYLES --- */
+
+/* --- TABLE FILTER STYLES (UPDATED/IMPROVED) --- */
+.filter-controls {
+    display: flex;
+    flex-direction: column; 
+    gap: 15px; 
+    margin-bottom: 20px;
+    padding: 20px; /* تباعد أكبر */
+    border: 1px solid #e0e0e0;
+    border-radius: 12px; /* زوايا مستديرة أكثر */
+    background-color: #ffffff; /* خلفية بيضاء لتميزها عن الكارد */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+.filter-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+/* فصل فلاتر المدة */
+.filter-group.period-filters {
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #ccc;
+    margin-bottom: 15px;
+    /* Ajustement pour le nouveau bouton unique */
+    display: block; 
+}
+
+/* --- NEW PERIOD FILTER DROPDOWN STYLES --- */
+.period-filter-dropdown-container {
+    position: relative;
+    display: inline-block;
+    width: 100%; 
+}
+#periodFilterButton {
+    width: auto;
+    background-color: #007bff; /* Couleur pour le bouton de période */
+    padding: 10px 15px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+}
+#periodFilterDropdown {
+    position: absolute;
+    z-index: 10;
+    background-color: #fff;
+    border: 1px solid #007bff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 200px;
+    right: 0; /* Alignement à droite */
+    top: 100%; /* Sous le bouton */
+    margin-top: 5px;
+}
+.period-filter-option {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: #333;
+    font-size: 0.95rem;
+    font-weight: 600;
+    gap: 10px;
+}
+.period-filter-option:hover {
+    background-color: #f0f0ff;
+}
+.period-filter-option.active {
+    background-color: #e0e0ff;
+    color: #007bff;
+    font-weight: bold;
+}
+
+/* --- TABLE SORT CONTROLS (NEW DROPDOWN STYLES) --- */
+.sort-controls {
+    display: block; /* Nécessaire pour contenir le dropdown */
+    margin-bottom: 15px;
+    padding: 10px;
+    border-left: 5px solid #007bff;
+    background-color: #f7f7f7;
+    border-radius: 0 8px 8px 0;
+}
+.sort-controls h3 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    border-left: none;
+    padding-left: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+/* Style pour le conteneur du bouton de tri */
+.sort-filter-dropdown-container {
+    position: relative;
+    display: inline-block;
+    width: 100%; 
+    max-width: 300px; /* Limiter la largeur du bouton */
+}
+#sortFilterButton {
+    width: 100%;
+    background-color: #007bff;
+    padding: 10px 15px;
+    margin: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    font-size: 1rem;
+}
+#sortFilterDropdown {
+    position: absolute;
+    z-index: 10;
+    background-color: #fff;
+    border: 1px solid #007bff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    min-width: 250px;
+    left: 0; 
+    top: 100%; 
+    margin-top: 5px;
+    padding: 5px 0;
+}
+.sort-filter-option {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    color: #333;
+    font-size: 0.95rem;
+    font-weight: 600;
+    gap: 10px;
+}
+.sort-filter-option:hover {
+    background-color: #f0f0ff;
+}
+.sort-filter-option.active {
+    background-color: #e0e0ff;
+    color: #007bff;
+    font-weight: bold;
+}
+/* --- END TABLE SORT CONTROLS --- */
+
+/* --- Table styles (IMPROVED) --- */
+.table-container { 
+    overflow-x: auto; 
+    margin-top: 25px; 
+    background-color: white; 
+    border-radius: 12px; /* زوايا مستديرة للكونتينر */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* ظل أثقل للجدول */
+}
+#presenceTable {
+    width: 100%;
+    border-collapse: collapse; /* لإزالة الفراغات */
+}
+#presenceTable th, #presenceTable td { 
+    border: 1px solid #e0e0e0; 
+    padding: 12px 10px; /* تباعد أكبر */
+    text-align: center; /* توسيط النص */
+    font-size: 0.85em; 
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+#presenceTable th { 
+    background-color: #D62828; 
+    color: white; 
+    font-weight: bold;
+    position: sticky; /* Sticky Header */
+    top: 0;
+    z-index: 5;
+}
+#presenceTable tr:nth-child(even) { background-color: #f9f9f9; } /* لون الصفوف الزوجية */
+#presenceTable tr:hover { background-color: #f0f0f0; } /* تأثير التحويم */
+
+/* تمييز الخلايا الرئيسية */
+#presenceTable td:nth-child(7), /* Heures Net */
+#presenceTable td:nth-child(8) { /* Statut */
+    background-color: #f2f7ff; /* خلفية فاتحة للأعمدة الرئيسية */
+    font-weight: bold;
+}
+#presenceTable tr:nth-child(even) td:nth-child(7),
+#presenceTable tr:nth-child(even) td:nth-child(8) {
+    background-color: #e5efff;
+}
+
+/* حالة الصفوف */
+.row-absence { background-color: #f8d7da !important; color: #721c24; }
+.row-active-punch { background-color: #fff3cd !important; color: #856404; }
+
+/* FIN des styles de Table améliorés */
+
+/* --- Modal (Pop-up) Styles (Updated to appear on top/front) --- */
+.modal {
+    /* Rendu visible par JS */
+    display: none; 
+    position: fixed; 
+    z-index: 2000; /* Très haut pour s'assurer qu'il est au-dessus de tout */
+    left: 0; top: 0; width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6); /* Fond noir semi-transparent */
+    padding-top: 50px; /* Espace pour le centrage */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto; /* Centrage vertical و horizontal */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+.close-button {
+    color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer;
+}
+.close-button:hover, .close-button:focus { color: #D62828; text-decoration: none; cursor: pointer; }
+/* FIN des styles de Modale */
+
+
+/* --- Calendar Styles --- */
+.calendar.month-view { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; margin-top: 10px; border: 1px solid #ddd; border-radius: 5px; padding: 5px; }
+.calendar.month-view .header { font-weight: bold; text-align: center; padding: 8px 5px; background-color: #333; color: white; border-radius: 0; font-size: 0.9em; }
+.calendar.month-view .day { padding: 5px; height: 80px; border: 1px solid #eee; border-radius: 4px; background-color: #ffffff; overflow: hidden; font-size: 1rem; position: relative; line-height: 1.2; display: flex; flex-direction: column; justify-content: flex-start; transition: background-color 0.2s; }
+.calendar.month-view .day.present { background-color: #e8f5e9; border: 1px solid #4CAF50; cursor: pointer; } 
+.calendar.month-view .day.absent { background-color: #ffebee; border: 1px solid #dc3545; cursor: pointer; } 
+.calendar.month-view .day.holiday { background-color: #fff8e1; border: 1px solid #FFC107; cursor: pointer; } 
+</style>
+</head>
+<body>
+<div id="toast-notification"></div>
+
+<header>
+    Système de Gestion de Présence
+</header>
+<main id="main">
+
+<div id="employees" class="tab-content-card">
+    <h2>📋 Gestion des Employés & Jours Fériés (Accueil)</h2>
+    <p style="border-bottom: 1px dashed #ccc; padding-bottom: 10px;">**Liste et gestion des employés:**</p>
+    <div class="input-group" style="display: block;">
+        <input type="text" id="workerName" placeholder="Nom complet de l'employé">
+        <input type="text" id="workerDepartment" placeholder="Département / Branche">
+        <div class="input-group" style="margin-top: 5px;">
+             <div><label for="defaultEntry">Entrée par défaut:</label><input type="time" id="defaultEntry" value="09:00"></div>
+            <div><label for="defaultExit">Sortie par défaut:</label><input type="time" id="defaultExit" value="17:00"></div>
+        </div>
+        <button onclick="addWorker()" style="margin-top: 5px;">Ajouter un employé</button>
+    </div>
+    <ul id="workerList" style="list-style-type: none; padding: 0;"></ul>
+    <p style="border-bottom: 1px dashed #ccc; padding: 15px 0 10px 0; margin-top: 20px;">**Gestion des jours fériés:**</p>
+    <div class="input-group" style="display: block;">
+        <input type="date" id="holidayDate" style="margin-bottom: 5px;">
+        <input type="text" id="holidayName" placeholder="Nom de la fête (ex: Noël)">
+        <button onclick="addHoliday()" style="margin-top: 5px; background-color: #007bff;">Ajouter un jour férié</button>
+    </div>
+    <ul id="holidayList" style="list-style-type: none; padding: 0;"></ul>
+</div>
+
+<div id="register" class="tab-content-card hidden">
+    <h2>✍️ Saisie de Présence & Absences (Unifiée)</h2>
+    
+    <div class="quick-register-card">
+        <h3>⚡ Enregistrement Instantané (Punch In / Punch Out)</h3>
+        
+        <div class="custom-select-container" id="quickSelectContainer">
+            <button id="customQuickSelectButton" class="custom-select-button" onclick="toggleWorkerDropdown('quick')">
+                <span id="selectedWorkerCount">-- Sélectionner 0 Employé(s) --</span>
+                <i class="fas fa-caret-down"></i>
+            </button>
+            <div id="customQuickWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('quick')">
+                </div>
+        </div>
+        <select id="registerQuickWorkerSelect" multiple size="4">
+            <option value="" disabled>-- Sélectionnez votre nom --</option>
+        </select>
+        
+        <textarea id="taskNoteQuick" placeholder="Tâche(s) accomplie(s) / Note (Optionnel)"></textarea>
+        <div class="input-group" style="justify-content: space-between; gap: 10px;">
+            <button onclick="quickPunch('in')" style="flex: 1;"><i class="fas fa-arrow-circle-right"></i> ENTRÉE</button>
+            <button onclick="quickPunch('out')" style="flex: 1;"><i class="fas fa-arrow-circle-left"></i> SORTIE</button>
+        </div>
+        <p style="font-size: 0.9em; color: #777; margin-top: 15px;">L'heure actuelle est enregistrée automatiquement.</p>
+    </div>
+    <div style="margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px;">
+        <h3>Résumé des entrées instantanées d'aujourd'hui:</h3>
+        <ul id="quickSummaryList" style="list-style-type: none; padding: 0;"></ul>
+    </div>
+    <hr style="margin-top: 30px; margin-bottom: 30px;">
+    <div class="manual-register-section">
+        <h3>🕰️ Saisie Manuelle ou Rétroactive</h3>
+        <div class="input-group">
+            <div><label for="workerSelect">Employé:</label><select id="workerSelect"><option value="" disabled selected>-- Sélectionner --</option></select></div>
+            <div><label for="dateSelect">Date:</label><input type="date" id="dateSelect"></div>
+        </div>
+        <div class="input-group">
+            <div><label for="entryTime">Heure d'Entrée:</label><input type="time" id="entryTime"></div>
+            <div><label for="exitTime">Heure de Sortie:</label><input type="time" id="exitTime"></div>
+        </div>
+        <div class="input-group">
+            <div><label for="breakStart">Début Pause (Optionnel):</label><input type="time" id="breakStart"></div>
+            <div><label for="breakEnd">Fin Pause (Optionnel):</label><input type="time" id="breakEnd"></div>
+        </div>
+        <textarea id="manualNote" placeholder="Tâches spécifiques ou note pour cette saisie (Optionnel)"></textarea>
+        <button id="registerButton" onclick="registerPresence()">Enregistrer la Présence</button>
+        <button onclick="clearForm()" style="background-color: #6c757d; margin-top: 5px;">Annuler / Nouveau Formulaire</button>
+    </div>
+    <hr style="margin-top: 30px; margin-bottom: 30px;">
+    <div class="absence-section">
+        <h3>❌ Gérer les Absences & Congés (Planifié ou pour un jour)</h3>
+        <div class="input-group">
+            <div><label for="absenceWorker">Employé:</label><select id="absenceWorker"><option value="" disabled selected>-- Sélectionner --</option></select></div>
+            <div><label for="absenceReason">Motif:</label><select id="absenceReason">
+                <option value="Maladie">Maladie</option><option value="Permission">Permission</option>
+                <option value="Conge_Annuel">Congé Annuel</option><option value="Autre">Autre</option>
+            </select></div>
+        </div>
+        <p style="margin-top: 15px; margin-bottom: 5px;">**Période de l'absence:**</p>
+        <div class="input-group">
+            <div><label for="startDate">Date Début:</label><input type="date" id="startDate"></div>
+            <div><label for="endDate">Date Fin (Même date si un seul jour):</label><input type="date" id="endDate"></div>
+        </div>
+        <button onclick="registerPlannedAbsence()" style="background-color: #d32f2f;">Planifier/Enregistrer l'Absence</button>
+        <p style="margin-top: 25px; border-top: 1px dashed #ddd; padding-top: 10px;">**Absences planifiées existantes:**</p>
+        <ul id="plannedAbsenceList" style="list-style-type: none; padding: 0;"></ul>
+    </div>
+</div>
+
+<div id="table" class="tab-content-card hidden">
+    <h2>📊 Tableau des Saisies</h2>
+    
+    <div class="filter-controls">
+        <h3><i class="fas fa-filter"></i> Filtres du Tableau</h3>
+        
+        <div class="filter-group period-filters">
+            <label style="margin-right: 15px;">Filtrer par Période:</label>
+            <div class="period-filter-dropdown-container">
+                 <button id="periodFilterButton" onclick="togglePeriodDropdown()">
+                    <i class="fas fa-calendar-alt"></i> 
+                    <span id="currentPeriodLabel">Toute la Période</span> 
+                    <i class="fas fa-caret-down"></i>
+                 </button>
+                 <div id="periodFilterDropdown" class="hidden">
+                    <div class="period-filter-option" data-filter="today" onclick="selectPeriodFilter('today')"><i class="fas fa-calendar-day" style="color:#28a745;"></i> Aujourd'hui</div>
+                    <div class="period-filter-option" data-filter="week" onclick="selectPeriodFilter('week')"><i class="fas fa-calendar-week" style="color:#ffc107;"></i> Cette Semaine</div>
+                    <div class="period-filter-option" data-filter="month" onclick="selectPeriodFilter('month')"><i class="fas fa-calendar-alt" style="color:#007bff;"></i> Ce Mois</div>
+                    <div class="period-filter-option active" data-filter="all" onclick="selectPeriodFilter('all')"><i class="fas fa-infinity" style="color:#6c757d;"></i> Toute la Période</div>
+                 </div>
+            </div>
+        </div>
+
+        <div class="filter-group" style="display: block;">
+            <label style="display: block; margin-bottom: 5px; margin-top: 10px;">Filtrer par Employés (Multi-sélection):</label>
+            <div class="custom-select-container" id="tableSelectContainer">
+                <button id="customTableSelectButton" class="custom-select-button" onclick="toggleWorkerDropdown('table')">
+                    <span id="selectedTableWorkerCount">-- Tous les employés (0) --</span>
+                    <i class="fas fa-caret-down"></i>
+                </button>
+                <div id="customTableWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('table')">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="sort-controls">
+        <h3><i class="fas fa-sort"></i> Options de Tri</h3>
+        <div class="sort-filter-dropdown-container">
+            <button id="sortFilterButton" onclick="toggleSortDropdown()">
+                <span id="currentSortLabel">Date (Récents)</span>
+                <i class="fas fa-caret-down"></i>
+            </button>
+            <div id="sortFilterDropdown" class="hidden">
+                 <div class="sort-filter-option active" data-column="date" data-direction="desc" onclick="selectSortOption('date', 'desc', 'Date (Récents)')"><i class="fas fa-sort-numeric-down"></i> Date (Récents)</div>
+                 <div class="sort-filter-option" data-column="date" data-direction="asc" onclick="selectSortOption('date', 'asc', 'Date (Anciens)')"><i class="fas fa-sort-numeric-up"></i> Date (Anciens)</div>
+                 <div class="sort-filter-option" data-column="hours" data-direction="desc" onclick="selectSortOption('hours', 'desc', 'Heures Net (Max)')"><i class="fas fa-sort-amount-down" style="color: #4CAF50;"></i> Heures Net (Max)</div>
+                 <div class="sort-filter-option" data-column="hours" data-direction="asc" onclick="selectSortOption('hours', 'asc', 'Heures Net (Min)')"><i class="fas fa-sort-amount-up" style="color: #4CAF50;"></i> Heures Net (Min)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="table-container"> 
+        <table id="presenceTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Nom</th>
+                    <th>Département</th>
+                    <th>Entrée</th>
+                    <th>Sortie</th>
+                    <th>Pause (min)</th>
+                    <th>H. Net</th>
+                    <th>Statut</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="calendar" class="tab-content-card hidden">
+    <h2>📅 Calendrier de Présence (Cliquez sur un jour pour les détails)</h2>
+    <select id="calendarWorker" onchange="drawCalendar(currentYear, currentMonth)"><option value="all">Tous les employés</option></select>
+    <div class="calendar-controls">
+        <button onclick="prevMonth()" style="width: auto; background-color: #555;"><i class="fas fa-chevron-left"></i> Précédent</button>
+        <h3 id="monthYearDisplay"></h3>
+        <button onclick="nextMonth()" style="width: auto; background-color: #555;">Suivant <i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div id="calendarDisplay" class="calendar month-view"></div>
+</div>
+
+<div id="reports" class="tab-content-card hidden">
+    <h2>📈 Analyse, Rapports & KPIs</h2>
+    <p>Sélectionnez un employé ou "Tous" pour filtrer les rapports:</p>
+    <select id="reportsWorkerSelect" onchange="calculateKPIs(); drawChart();">
+        <option value="all">Tous les employés</option>
+    </select>
+    
+    <div class="kpi-container" style="margin-top: 25px;">
+        <div class="kpi-card">
+            <h4>Taux d'Absence Global (Mois)</h4>
+            <span id="kpiAbsenceRate" class="kpi-value">--%</span>
+        </div>
+        <div class="kpi-card">
+            <h4>Moyenne H. Net par Jour (Mois)</h4>
+            <span id="kpiAvgHours" class="kpi-value">-- h</span>
+        </div>
+        <div class="kpi-card">
+            <h4>Total Heures Net (Mois)</h4>
+            <span id="kpiTotalHoursMonth" class="kpi-value">-- h</span>
+        </div>
+    </div>
+    
+    <h3 style="margin-top: 30px;">Synthèse de Performance Mensuelle par Employé</h3>
+    <div class="table-container">
+        <table id="monthlyReportTable" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Employé</th>
+                    <th>Total Heures (Mois)</th>
+                    <th>Jours d'Absence</th>
+                    <th>Moy. Retard Entrée</th>
+                </tr>
+            </thead>
+            <tbody></tobody>
+        </table>
+    </div>
+
+    <h3 style="margin-top: 30px;">Graphique d'Heures de Travail par Employé</h3>
+    <canvas id="hoursChart" style="margin-top: 10px;"></canvas>
+</div>
+
+<div id="profile" class="tab-content-card hidden">
+    <h2>👤 Détails du Profil & Modification</h2>
+    <p>Sélectionnez un employé pour visualiser/modifier ses informations:</p>
+    <select id="profileWorkerSelect" onchange="loadWorkerProfile()"><option value="" disabled selected>Sélectionner un employé</option></select>
+    
+    <div id="workerProfileDetails" class="profile-details-card hidden" style="border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-top: 15px; background-color: #fcfcfc;">
+        <div class="profile-image-container">
+            <img id="profileImage" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Image Profil">
+            <input type="file" id="profileImageUpload" accept="image/*" style="margin-top: 10px; width: auto; padding: 5px;" onchange="previewProfileImage(event)">
+        </div>
+        
+        <h3 style="margin-top: 15px;">⚙️ Informations de base</h3>
+        <label for="editName">Nom Complet:</label>
+        <input type="text" id="editName" placeholder="Nouveau Nom">
+        
+        <label for="editDept">Département:</label>
+        <input type="text" id="editDept" placeholder="Nouveau Département">
+        
+        <div class="input-group">
+            <div><label for="editEntry">Entrée par défaut:</label><input type="time" id="editEntry"></div>
+            <div><label for="editExit">Sortie par défaut:</label><input type="time" id="editExit"></div>
+        </div>
+        
+        <button onclick="saveWorkerProfile()" style="background-color: #4CAF50; margin-top: 15px;"><i class="fas fa-save"></i> Sauvegarder les Modifications</button>
+
+        <hr style="margin: 30px 0;">
+        
+        <h3 style="margin-top: 0;">🎯 Performance du Mois</h3>
+        
+        <div class="profile-kpi-container">
+            <div class="profile-kpi-card">
+                <h4><i class="fas fa-hourglass-half profile-icon" style="color:#007bff;"></i> Total Heures Net</h4>
+                <span id="profileTotalHours" class="profile-value">0.00h</span>
+            </div>
+            <div class="profile-kpi-card">
+                <h4><i class="fas fa-percentage profile-icon" style="color:#4CAF50;"></i> Taux de Punch</h4>
+                <span id="profilePunchRate" class="profile-value">--%</span>
+            </div>
+            <div class="profile-kpi-card">
+                <h4><i class="fas fa-calendar-times profile-icon" style="color:#dc3545;"></i> Jours d'Absence (Net)</h4>
+                <span id="profileAbsenceDays" class="profile-value">0</span>
+            </div>
+             <div class="profile-kpi-card">
+                <h4><i class="fas fa-stopwatch profile-icon" style="color:#FFC107;"></i> Jours de Retard</h4>
+                <span id="profileLatenessDays" class="profile-value">0</span> 
+            </div>
+        </div>
+
+        <hr style="margin: 30px 0;">
+
+        <h3 style="margin-top: 0;">📈 Analyse d'Assiduité (Mois Actuel)</h3>
+        <div style="width: 100%; max-width: 300px; margin: 15px auto;">
+            <canvas id="profileAttendanceChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div id="export" class="tab-content-card hidden">
+    <h2>💾 Exportation et Sauvegarde</h2>
+    <p>Utilisez ces boutons pour sauvegarder vos données ou les exporter au format Excel (.xlsx).</p>
+    <button onclick="exportDataToExcel('all')" style="background-color: #1e7e34;"><i class="fas fa-file-excel"></i> Exporter TOUTES les Saisies (Excel)</button>
+    <p style="margin-top: 20px;">**Sauvegarde de la configuration actuelle:**</p>
+    <button onclick="backupData()" style="background-color: #555;"><i class="fas fa-cloud-download-alt"></i> Sauvegarder (Télécharger le JSON)</button>
+    <p style="margin-top: 20px;">**Restaurer les données:**</p>
+    <input type="file" id="restoreFile" accept=".json" style="margin-bottom: 10px;">
+    <button onclick="restoreData()" style="background-color: #dc3545;"><i class="fas fa-upload"></i> Restaurer (Importer le JSON)</button>
+</div>
+
+</main>
+
+<div class="tab-navigation">
+    <button class="tab-button active" onclick="openTab(event, 'employees')"><i class="fas fa-home"></i> Accueil</button>
+    <button class="tab-button" onclick="openTab(event, 'register')"><i class="fas fa-sign-in-alt"></i> Saisie</button>
+    <button class="tab-button" onclick="openTab(event, 'table')"><i class="fas fa-list-alt"></i> Tableau</button>
+    <button class="tab-button" onclick="openTab(event, 'calendar')"><i class="fas fa-calendar-alt"></i> Calendrier</button>
+    <button class="tab-button" onclick="openTab(event, 'reports')"><i class="fas fa-chart-line"></i> Rapports</button>
+    <button class="tab-button" onclick="openTab(event, 'profile')"><i class="fas fa-user-circle"></i> Profil</button>
+    <button class="tab-button" onclick="openTab(event, 'export')"><i class="fas fa-file-export"></i> Export</button>
+</div>
+
+<div id="dayDetailsModal" class="modal" onclick="if(event.target === this) closeModal()">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">&times;</span>
+        <h3 id="modalDateTitle"></h3>
+        <p style="font-weight: bold;" id="modalHolidayInfo"></p>
+        <hr>
+        <h4>Détails de Présence/Absence:</h4>
+        <ul id="modalDetailsList" style="list-style-type: none; padding: 0;">
+            </ul>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Clés de localStorage & Global Variables
+const workersKey='workers'; const presenceKey='presence'; const plannedAbsenceKey='plannedAbsence'; const holidaysKey='holidays'; 
+const today = new Date().toISOString().slice(0, 10); 
+let editingIndex=null; let chart=null; let profileChart = null; 
+let currentMonth = new Date().getMonth(); let currentYear = new Date().getFullYear();
+const monthNames = ["Janvier", "Février", "Mars", "Avril", "Mai", "Juin", "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"];
+const dayNames = ["Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi"];
+
+// Variables de Filtrage du Tableau
+let currentFilter = 'all'; // 'today', 'week', 'month', 'all'
+let selectedTableWorkers = [];
+
+// Variables de Tri (Mises à jour pour le tri par défaut)
+let currentSortColumn = 'date';
+let currentSortDirection = 'desc';
+
+// --- Helper Functions (CORE FUNCTIONALITY) ---
+function timeToMinutes(timeStr) {
+    if (!timeStr) return 0;
+    const [hours, minutes] = timeStr.split(':').map(Number);
+    return hours * 60 + minutes;
+}
+function timeDiffInMinutes(startStr, endStr) {
+    if (!startStr || !endStr) return 0;
+    const startMinutes = timeToMinutes(startStr);
+    let endMinutes = timeToMinutes(endStr);
+    if (endMinutes < startMinutes) { endMinutes += 1440; }
+    return Math.max(0, endMinutes - startMinutes);
+}
+function calculateHours(entry, exit, breakStart, breakEnd) { 
+    let totalWorkMinutes = timeDiffInMinutes(entry, exit);
+    let breakMinutes = timeDiffInMinutes(breakStart, breakEnd);
+    if (breakMinutes > 0) totalWorkMinutes -= breakMinutes;
+    return totalWorkMinutes > 0 ? totalWorkMinutes / 60 : 0;
+}
+function calculateBreakMinutes(breakStart, breakEnd) { return timeDiffInMinutes(breakStart, breakEnd); }
+function calculateLateness(entryTime, defaultEntryTime) {
+    if (!entryTime || !defaultEntryTime) return 0;
+    const entryMinutes = timeToMinutes(entryTime);
+    const defaultMinutes = timeToMinutes(defaultEntryTime);
+    return Math.max(0, entryMinutes - defaultMinutes); 
+}
+function showToast(message, duration = 3000) { 
+    const toast = document.getElementById('toast-notification');
+    if (!toast) return;
+    toast.textContent = message;
+    toast.style.cssText = 'visibility: visible; min-width: 250px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 12px; position: fixed; z-index: 1001; left: 50%; bottom: 80px; transform: translateX(-50%); opacity: 1; transition: opacity 0.3s;';
+    setTimeout(() => { toast.style.opacity = '0'; }, duration - 300);
+    setTimeout(() => { toast.style.visibility = 'hidden'; }, duration);
+}
+function getWorkersList() { return JSON.parse(localStorage.getItem(workersKey) || '[]'); }
+function isHolidayCheck(dateStr) { 
+    const holidays = JSON.parse(localStorage.getItem(holidaysKey) || '[]');
+    return holidays.some(h => h.date === dateStr);
+}
+
+// --- Modal Handlers (Mise à jour pour un affichage "fixe") ---
+function showDayDetails(dateStr) {
+    const presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    const holidays = JSON.parse(localStorage.getItem(holidaysKey) || '[]');
+    const isHoliday = holidays.find(h => h.date === dateStr);
+    
+    const dayRecords = presence.filter(p => p.date === dateStr);
+    
+    const modal = document.getElementById('dayDetailsModal');
+    const title = document.getElementById('modalDateTitle');
+    const holidayInfo = document.getElementById('modalHolidayInfo');
+    const detailsList = document.getElementById('modalDetailsList');
+
+    detailsList.innerHTML = '';
+    
+    const dateObj = new Date(dateStr + 'T00:00:00'); 
+    const dayName = dayNames[dateObj.getDay()];
+    
+    let totalNetHoursDay = 0;
+    dayRecords.forEach(p => {
+        if (p.entry && p.exit) {
+            totalNetHoursDay += calculateHours(p.entry, p.exit, p.breakStart, p.breakEnd);
+        }
+    });
+
+    title.innerHTML = `📅 **${dayName} ${dateStr}**`;
+    if (dayRecords.length > 0) {
+        title.innerHTML += `<br><small style="color:#007bff; font-weight:normal;">Total Net: **${totalNetHoursDay.toFixed(2)}h**</small>`;
+    }
+    
+    if (isHoliday) {
+        holidayInfo.textContent = `🎉 Jour Férié: ${isHoliday.name}`;
+        holidayInfo.style.color = '#D62828'; 
+    } else {
+        holidayInfo.textContent = 'Jour Ouvré Normal.';
+        holidayInfo.style.color = 'inherit';
+    }
+
+    if (dayRecords.length === 0) {
+        if (dateObj.getDay() === 0 || dateObj.getDay() === 6) {
+            detailsList.innerHTML = '<li style="color: #6c757d;"><i class="fas fa-mug-hot"></i> Aucune entrée. (Weekend)</li>';
+        } else {
+            detailsList.innerHTML = '<li style="color: #6c757d;"><i class="fas fa-info-circle"></i> Aucune entrée de présence/absence enregistrée pour cette date.</li>';
+        }
+    } else {
+        dayRecords.forEach(p => {
+            const li = document.createElement('li');
+            li.style.padding = '10px 0';
+            li.style.borderBottom = '1px dotted #ccc';
+            
+            let statusText = '';
+            let color = 'inherit';
+            let icons = '';
+            
+            if (p.absence) {
+                statusText = `❌ Absent: ${p.absence}`;
+                color = '#dc3545';
+                icons += `<i class="fas fa-calendar-times"></i>`;
+            } else if (p.entry && p.exit) {
+                const hours = calculateHours(p.entry, p.exit, p.breakStart, p.breakEnd).toFixed(2);
+                const breakMins = calculateBreakMinutes(p.breakStart, p.breakEnd);
+                statusText = `✅ Présent: ${p.entry} - ${p.exit}`;
+                color = '#4CAF50'; 
+                icons += `<span style="color:${color};"><i class="fas fa-clock"></i> Net: ${hours}h</span> | <span style="color:#6c757d;"><i class="fas fa-coffee"></i> Pause: ${breakMins}m</span>`;
+            } else if (p.entry && !p.exit) {
+                statusText = `🟡 Actif: Entré à ${p.entry} (Pas de sortie)`;
+                color = '#FFC107'; 
+                icons += `<i class="fas fa-running"></i>`;
+            } else {
+                statusText = `❓ Statut Indéterminé`;
+            }
+            
+            const noteContent = p.note ? `<br><small style="color:#777; margin-top: 5px;"><i class="fas fa-sticky-note"></i> **Note:** ${p.note}</small>` : '';
+            
+            li.innerHTML = `
+                <div style="font-weight: bold; margin-bottom: 5px;">${p.name}</div>
+                <div style="color: ${color}; font-size: 0.95rem;">${statusText}</div>
+                <div style="font-size: 0.85rem; margin-top: 5px;">${icons}</div>
+                ${noteContent}
+            `;
+            detailsList.appendChild(li);
+        });
+    }
+
+    modal.style.display = 'block'; // Afficher la modale au premier plan
+}
+
+function closeModal() {
+    document.getElementById('dayDetailsModal').style.display = 'none'; // Masquer la modale
+}
+// --- End Modal Handlers ---
+
+// --- Core Tab Navigation & Initial Load ---
+function openTab(evt, tabName) {
+    let i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content-card");
+    for (i = 0; i < tabcontent.length; i++) { tabcontent[i].classList.add('hidden'); }
+    tablinks = document.getElementsByClassName("tab-button");
+    for (i = 0; i < tablinks.length; i++) { tablinks[i].classList.remove("active"); }
+    document.getElementById(tabName).classList.remove('hidden');
+    evt.currentTarget.classList.add("active");
+    
+    if(tabName === 'reports') { loadWorkersIntoSelects(); calculateKPIs(); drawChart(); } 
+    if(tabName === 'table') { loadWorkersIntoSelects(); loadPresence(); updatePeriodFilterButtonLabel(); updateSortButtonLabel(); } 
+    if(tabName === 'calendar') { loadWorkersIntoSelects(); drawCalendar(currentYear, currentMonth); } 
+    if(tabName === 'employees') { loadWorkers(); loadHoliday(); }
+    if(tabName === 'register') { loadWorkersIntoSelects(); loadQuickSummary(); loadPlannedAbsence(); } 
+    if(tabName === 'profile') { loadWorkersIntoSelects(); loadWorkerProfile(); } 
+}
+
+// ------------------------------------
+// 1. Worker Management 
+// ------------------------------------
+function addWorker() {
+    const name = document.getElementById('workerName').value.trim();
+    const dept = document.getElementById('workerDepartment').value.trim();
+    const entry = document.getElementById('defaultEntry').value;
+    const exit = document.getElementById('defaultExit').value;
+
+    if (!name) return showToast('Veuillez entrer le nom de l\'employé.', 3000);
+
+    let workers = getWorkersList();
+    if (workers.some(w => w.name === name)) return showToast('Cet employé existe déjà.', 3000);
+
+    workers.push({ 
+        name, department: dept, defaultEntry: entry, defaultExit: exit, 
+        image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>"
+    }); 
+    localStorage.setItem(workersKey, JSON.stringify(workers));
+    showToast(`${name} ajouté avec succès!`, 3000);
+    
+    document.getElementById('workerName').value = '';
+    document.getElementById('workerDepartment').value = '';
+    loadWorkers();
+    loadWorkersIntoSelects();
+}
+
+function loadWorkers(){
+  const ul=document.getElementById('workerList'); ul.innerHTML='';
+  const workers=getWorkersList();
+  if (workers.length === 0) { ul.innerHTML = '<li style="color: #777; border-left: none; background-color: transparent;">Aucun employé enregistré.</li>'; return; }
+  workers.forEach((w,i)=>{
+    const name = w.name;
+    const shift = ` (${w.defaultEntry} - ${w.defaultExit})`;
+    const dept = w.department ? ` [${w.department}]` : ''; 
+
+    const li=document.createElement('li'); 
+    li.style.cssText = 'padding: 5px 0; border-bottom: 1px dotted #eee;';
+    li.textContent=`${name}${dept}${shift}`;
+    li.innerHTML += ` <button onclick="deleteWorker('${name}')" class="delete-btn" title="Supprimer"><i class="fas fa-trash-alt"></i></button>`;
+    ul.appendChild(li);
+  });
+}
+
+function deleteWorker(name) {
+    if (confirm(`Êtes-vous sûr de vouloir supprimer ${name} et ses données de présence?`)) {
+        let workers = getWorkersList().filter(w => w.name !== name);
+        let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]').filter(p => p.name !== name);
+        let plannedAbsence = JSON.parse(localStorage.getItem(plannedAbsenceKey) || '[]').filter(a => a.name !== name); 
+        
+        localStorage.setItem(workersKey, JSON.stringify(workers));
+        localStorage.setItem(presenceKey, JSON.stringify(presence));
+        localStorage.setItem(plannedAbsenceKey, JSON.stringify(plannedAbsence)); 
+        
+        showToast(`${name} a été supprimé.`, 3000);
+        loadWorkers();
+        loadWorkersIntoSelects();
+        loadPresence(); 
+    }
+}
+
+// --- Holiday Management ---
+function addHoliday() {
+    const date = document.getElementById('holidayDate').value;
+    const name = document.getElementById('holidayName').value.trim();
+    if (!date || !name) return showToast('Veuillez entrer la date et le nom du jour férié.', 3000);
+
+    let holidays = JSON.parse(localStorage.getItem(holidaysKey) || '[]');
+    holidays.push({ date, name });
+    localStorage.setItem(holidaysKey, JSON.stringify(holidays));
+    showToast(`Jour férié '${name}' ajouté.`, 3000);
+    loadHoliday();
+    drawCalendar(currentYear, currentMonth); 
+}
+
+function loadHoliday() {
+    const ul = document.getElementById('holidayList'); ul.innerHTML = '';
+    const holidays = JSON.parse(localStorage.getItem(holidaysKey) || '[]').sort((a, b) => new Date(a.date) - new Date(b.date));
+    if (holidays.length === 0) { ul.innerHTML = '<li style="color: #777; border-left: none; background-color: transparent;">Aucun jour férié enregistré.</li>'; return; }
+
+    holidays.forEach(h => {
+        const li = document.createElement('li');
+        li.textContent = `${h.date} - ${h.name}`;
+        li.innerHTML += ` <button onclick="deleteHoliday('${h.date}')" class="delete-btn" title="Supprimer"><i class="fas fa-trash-alt"></i></button>`;
+        ul.appendChild(li);
+    });
+}
+function deleteHoliday(date) {
+     if (confirm(`Êtes-vous sûr de vouloir supprimer le jour férié du ${date}?`)) {
+        let holidays = JSON.parse(localStorage.getItem(holidaysKey) || '[]').filter(h => h.date !== date);
+        localStorage.setItem(holidaysKey, JSON.stringify(holidays));
+        showToast(`Jour férié du ${date} supprimé.`, 3000);
+        loadHoliday();
+        drawCalendar(currentYear, currentMonth); 
+     }
+}
+
+
+// --- Presence/Absence Management (LOAD SELECTS & NEW CUSTOM SELECT) ---
+function loadWorkersIntoSelects() {
+    const workers = getWorkersList().sort((a, b) => a.name.localeCompare(b.name));
+    
+    const selectIds = [
+        'workerSelect', 'absenceWorker', 
+        'calendarWorker', 'profileWorkerSelect', 'reportsWorkerSelect'
+    ];
+    
+    // 1. Charger les selects simples (WorkerSelect, AbsenceWorker, etc.)
+    selectIds.forEach(id => {
+        const select = document.getElementById(id);
+        if (!select) return; 
+        
+        const selectedValue = select.value;
+        select.innerHTML = '';
+        
+        const isDefaultAll = (id === 'calendarWorker' || id === 'reportsWorkerSelect');
+        
+        const defaultOption = document.createElement('option');
+        if (isDefaultAll) {
+             defaultOption.value = 'all';
+             defaultOption.textContent = 'Tous les employés';
+        } else {
+            defaultOption.value = '';
+            defaultOption.disabled = true;
+            defaultOption.textContent = '-- Sélectionner --';
+        }
+        defaultOption.selected = true; 
+        select.appendChild(defaultOption);
+
+        workers.forEach(worker => {
+            const option = document.createElement('option');
+            option.value = worker.name;
+            option.textContent = worker.name;
+            select.appendChild(option);
+        });
+
+        if (select.querySelector(`option[value="${selectedValue}"]`)) {
+            select.value = selectedValue;
+        } else if (isDefaultAll) {
+            select.value = 'all'; 
+        }
+    });
+    
+    // 2. Créer le Custom Dropdown pour Quick Punch
+    createCustomDropdown('quick', workers, [], updateCustomSelectButton);
+    
+    // 3. Créer le Custom Dropdown pour le Tableau (Multi-sélection de filtre)
+    createCustomDropdown('table', workers, selectedTableWorkers, updateTableCustomSelectButton);
+}
+
+function createCustomDropdown(type, workers, initialSelection, updateFunction) {
+    const dropdownId = `custom${type.charAt(0).toUpperCase() + type.slice(1)}WorkerSelectDropdown`;
+    const dropdown = document.getElementById(dropdownId);
+    
+    if (!dropdown) return;
+    
+    dropdown.innerHTML = '';
+    
+    if (workers.length === 0) {
+        dropdown.innerHTML = '<div style="padding: 10px; color: #777;">Aucun employé enregistré.</div>';
+        updateFunction(type);
+        return;
+    }
+
+    // Ajout de l'option "Tout sélectionner/Désélectionner" pour le filtre de table
+    if (type === 'table') {
+        const toggleAllLabel = document.createElement('label');
+        toggleAllLabel.className = 'dropdown-item-label';
+        toggleAllLabel.style.fontWeight = 'bold';
+        
+        const toggleAllCheckbox = document.createElement('input');
+        toggleAllCheckbox.type = 'checkbox';
+        toggleAllCheckbox.id = 'toggle-all-workers';
+        
+        // Initialiser la case "Tout sélectionner"
+        if (initialSelection.length === workers.length && workers.length > 0) {
+            toggleAllCheckbox.checked = true;
+            toggleAllLabel.classList.add('selected');
+        }
+
+        toggleAllCheckbox.onchange = () => {
+            const isChecked = toggleAllCheckbox.checked;
+            const checkboxes = document.querySelectorAll(`#${dropdownId} input[type="checkbox"]:not(#toggle-all-workers)`);
+            checkboxes.forEach(cb => {
+                cb.checked = isChecked;
+                cb.closest('.dropdown-item-label').classList.toggle('selected', isChecked);
+            });
+            // Mise à jour de la liste des employés sélectionnés après l'action "Tout"
+            if (isChecked) {
+                selectedTableWorkers = workers.map(w => w.name);
+            } else {
+                selectedTableWorkers = [];
+            }
+            toggleAllLabel.classList.toggle('selected', isChecked);
+            updateFunction(type);
+            loadPresence(); 
+        };
+        
+        toggleAllLabel.appendChild(toggleAllCheckbox);
+        toggleAllLabel.appendChild(document.createTextNode('Tout Sélectionner / Désélectionner'));
+        dropdown.appendChild(toggleAllLabel);
+        
+        dropdown.appendChild(document.createElement('hr'));
+    }
+
+    workers.forEach(worker => {
+        const label = document.createElement('label');
+        label.className = 'dropdown-item-label';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = `${type}Worker`;
+        checkbox.value = worker.name;
+        checkbox.id = `${type}-worker-${worker.name.replace(/\s/g, '_')}`; 
+        
+        const isSelected = initialSelection.includes(worker.name);
+        checkbox.checked = isSelected;
+        if (isSelected) label.classList.add('selected');
+        
+        checkbox.onchange = () => {
+            if (checkbox.checked) {
+                label.classList.add('selected');
+                if (type === 'table' && !selectedTableWorkers.includes(worker.name)) {
+                    selectedTableWorkers.push(worker.name);
+                }
+            } else {
+                label.classList.remove('selected');
+                if (type === 'table') {
+                    selectedTableWorkers = selectedTableWorkers.filter(n => n !== worker.name);
+                }
+            }
+            
+            // Si le type est 'table', on doit vérifier si 'Tout' doit être décoché
+            if (type === 'table') {
+                const totalWorkers = workers.length;
+                const checkedWorkers = selectedTableWorkers.length;
+                const toggleAllCheckbox = document.getElementById('toggle-all-workers');
+                const toggleAllLabel = toggleAllCheckbox ? toggleAllCheckbox.closest('.dropdown-item-label') : null;
+
+                if (toggleAllCheckbox) {
+                    toggleAllCheckbox.checked = (checkedWorkers === totalWorkers);
+                    if (toggleAllLabel) toggleAllLabel.classList.toggle('selected', (checkedWorkers === totalWorkers));
+                }
+                loadPresence(); // Recharge le tableau après modification du filtre
+            }
+            
+            updateFunction(type);
+        };
+
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(worker.name));
+        dropdown.appendChild(label);
+    });
+    
+    updateFunction(type);
+}
+
+
+// --- Custom Dropdown Handlers ---
+function toggleWorkerDropdown(type) {
+    const dropdownId = `custom${type.charAt(0).toUpperCase() + type.slice(1)}WorkerSelectDropdown`;
+    const buttonId = `custom${type.charAt(0).toUpperCase() + type.slice(1)}SelectButton`;
+    
+    const dropdown = document.getElementById(dropdownId);
+    const button = document.getElementById(buttonId);
+    
+    if (!dropdown || !button) return;
+    
+    const isHidden = dropdown.classList.contains('hidden');
+    
+    // Fermer les autres dropdowns ouverts si besoin
+    if (type === 'quick') closeWorkerDropdown('table');
+    if (type === 'table') closeWorkerDropdown('quick');
+    closePeriodDropdown(); // Fermer le dropdown de période si ouvert
+    closeSortDropdown(); // Fermer le dropdown de tri si ouvert
+    
+    if (isHidden) {
+        dropdown.classList.remove('hidden');
+        button.classList.add('active');
+    } else {
+        dropdown.classList.add('hidden');
+        button.classList.remove('active');
+    }
+}
+
+function closeWorkerDropdown(type) {
+    const dropdownId = `custom${type.charAt(0).toUpperCase() + type.slice(1)}WorkerSelectDropdown`;
+    const buttonId = `custom${type.charAt(0).toUpperCase() + type.slice(1)}SelectButton`;
+    
+    const dropdown = document.getElementById(dropdownId);
+    const button = document.getElementById(buttonId);
+    
+    if (!dropdown || !button) return;
+    
+    if (!dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+        button.classList.remove('active');
+    }
+}
+
+function updateCustomSelectButton(type) {
+    const dropdownId = `custom${type.charAt(0).toUpperCase() + type.slice(1)}WorkerSelectDropdown`;
+    const buttonTextId = (type === 'quick') ? 'selectedWorkerCount' : 'selectedTableWorkerCount';
+    const buttonId = `custom${type.charAt(0).toUpperCase() + type.slice(1)}SelectButton`;
+    
+    const selector = (type === 'table') ? `#${dropdownId} input[type="checkbox"]:checked:not(#toggle-all-workers)` : `#${dropdownId} input[type="checkbox"]:checked`;
+    const checkboxes = document.querySelectorAll(selector);
+    const count = checkboxes.length;
+    const buttonText = document.getElementById(buttonTextId);
+    const workersCount = getWorkersList().length;
+
+    if (!buttonText) return;
+
+    if (type === 'table') {
+        if (count === 0 || count === workersCount) {
+             buttonText.innerHTML = `-- Tous les employés (${workersCount}) --`;
+        } else if (count === 1) {
+            buttonText.innerHTML = `**${checkboxes[0].value}**`;
+        } else {
+            buttonText.innerHTML = `**${count} Employé(s)** sélectionné(s)`;
+        }
+    } else if (type === 'quick') {
+        if (count === 0) {
+             buttonText.innerHTML = `-- Sélectionner 0 Employé(s) --`;
+        } else if (count === 1) {
+            buttonText.innerHTML = `**${checkboxes[0].value}**`;
+        } else {
+            buttonText.innerHTML = `**${count} Employé(s)** sélectionné(s)`;
+        }
+    }
+
+    buttonText.style.color = 'white'; 
+    const button = document.getElementById(buttonId);
+    if (button) {
+        button.style.backgroundColor = '#D62828';
+        button.style.borderColor = '#D62828';
+        button.style.color = 'white'; 
+        const icon = button.querySelector('i');
+        if (icon) icon.style.color = 'white';
+    }
+}
+
+// Pour le select du tableau, on s'assure que le 0 employé signifie "tous"
+function updateTableCustomSelectButton() {
+    const checkboxes = document.querySelectorAll('#customTableWorkerSelectDropdown input[type="checkbox"]:checked:not(#toggle-all-workers)');
+    selectedTableWorkers = Array.from(checkboxes).map(cb => cb.value);
+    
+    updateCustomSelectButton('table');
+}
+
+// --- NEW PERIOD FILTER LOGIC ---
+function togglePeriodDropdown() {
+    const dropdown = document.getElementById('periodFilterDropdown');
+    const button = document.getElementById('periodFilterButton');
+    
+    // Fermer les autres dropdowns
+    closeWorkerDropdown('quick');
+    closeWorkerDropdown('table');
+    closeSortDropdown();
+    
+    if (dropdown.classList.contains('hidden')) {
+        dropdown.classList.remove('hidden');
+        button.classList.add('active');
+    } else {
+        dropdown.classList.add('hidden');
+        button.classList.remove('active');
+    }
+}
+
+function closePeriodDropdown() {
+    const dropdown = document.getElementById('periodFilterDropdown');
+    const button = document.getElementById('periodFilterButton');
+    if (dropdown && button) {
+        dropdown.classList.add('hidden');
+        button.classList.remove('active');
+    }
+}
+
+function selectPeriodFilter(filterType) {
+    applyDateFilter(filterType);
+    updatePeriodFilterButtonLabel(filterType);
+    closePeriodDropdown(); 
+}
+
+function updatePeriodFilterButtonLabel(filterType = currentFilter) {
+    const labelSpan = document.getElementById('currentPeriodLabel');
+    const options = document.querySelectorAll('.period-filter-option');
+    
+    if (!labelSpan) return;
+    
+    let label = '';
+    options.forEach(opt => {
+        opt.classList.remove('active');
+        if (opt.getAttribute('data-filter') === filterType) {
+            label = opt.textContent.trim();
+            opt.classList.add('active');
+        }
+    });
+    
+    labelSpan.textContent = label || 'Toute la Période';
+    currentFilter = filterType;
+}
+
+// --- NEW SORT DROPDOWN LOGIC ---
+function toggleSortDropdown() {
+    const dropdown = document.getElementById('sortFilterDropdown');
+    const button = document.getElementById('sortFilterButton');
+    
+    // Fermer les autres dropdowns
+    closeWorkerDropdown('quick');
+    closeWorkerDropdown('table');
+    closePeriodDropdown();
+    
+    if (dropdown.classList.contains('hidden')) {
+        dropdown.classList.remove('hidden');
+        button.classList.add('active');
+    } else {
+        dropdown.classList.add('hidden');
+        button.classList.remove('active');
+    }
+}
+
+function closeSortDropdown() {
+    const dropdown = document.getElementById('sortFilterDropdown');
+    const button = document.getElementById('sortFilterButton');
+    if (dropdown && button) {
+        dropdown.classList.add('hidden');
+        button.classList.remove('active');
+    }
+}
+
+function selectSortOption(column, direction, label) {
+    currentSortColumn = column;
+    currentSortDirection = direction;
+    loadPresence();
+    
+    // Mise à jour de l'interface
+    updateSortButtonLabel(label);
+    closeSortDropdown();
+    
+    // Mettre à jour la classe "active" dans le dropdown
+    const options = document.querySelectorAll('.sort-filter-option');
+    options.forEach(opt => {
+        opt.classList.remove('active');
+        if (opt.getAttribute('data-column') === column && opt.getAttribute('data-direction') === direction) {
+            opt.classList.add('active');
+        }
+    });
+}
+
+function updateSortButtonLabel(label = null) {
+    const labelSpan = document.getElementById('currentSortLabel');
+    if (label) {
+        labelSpan.textContent = label;
+        showToast(`Tri appliqué: ${label}.`, 3000);
+    } else {
+        // Au chargement, définir le label par défaut si non spécifié
+        const defaultOption = document.querySelector(`.sort-filter-option[data-column="${currentSortColumn}"][data-direction="${currentSortDirection}"]`);
+        if (defaultOption) {
+            labelSpan.textContent = defaultOption.textContent.trim();
+        } else {
+             labelSpan.textContent = 'Date (Récents)'; // Fallback
+        }
+    }
+}
+
+// NOTE: L'ancienne fonction sortPresenceTable n'est plus appelée directement par les boutons, 
+// mais elle est conservée ici pour la lisibilité de loadPresence (même si le corps est fusionné dans selectSortOption)
+function sortPresenceTable(column, direction) {
+    // Cette fonction est désormais un alias de selectSortOption pour l'appel de loadPresence().
+    // Le tri réel et la mise à jour des variables globales se font dans selectSortOption().
+    // Nous appelons ici pour maintenir la compatibilité si d'autres parties du code l'utilisent.
+    const label = document.querySelector(`.sort-filter-option[data-column="${column}"][data-direction="${direction}"]`)?.textContent.trim() || 'Tri Personnalisé';
+    selectSortOption(column, direction, label);
+}
+// --- END NEW SORT DROPDOWN LOGIC ---
+
+
+// --- Quick Punch In/Out (UPDATED TO READ CHECKBOXES) ---
+function quickPunch(type) {
+    const checkboxes = document.querySelectorAll('#customQuickWorkerSelectDropdown input[type="checkbox"]:checked');
+    const selectedNames = Array.from(checkboxes).map(cb => cb.value);
+
+    const note = document.getElementById('taskNoteQuick').value.trim();
+    if (selectedNames.length === 0) return showToast('Veuillez sélectionner au moins un nom.', 3000);
+
+    let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    const currentTime = new Date().toTimeString().slice(0, 5); // HH:MM
+    let successCount = 0;
+    let failedNames = [];
+
+    selectedNames.forEach(name => {
+        if (type === 'in') {
+            const existingEntry = presence.find(p => p.name === name && p.date === today && !p.exit);
+            if (existingEntry) {
+                failedNames.push(name);
+                return;
+            }
+
+            presence.push({
+                date: today, name, entry: currentTime, exit: null, breakStart: null, breakEnd: null, note: note, absence: null
+            });
+            successCount++;
+
+        } else if (type === 'out') {
+            const index = presence.findIndex(p => p.name === name && p.date === today && !p.exit);
+            if (index === -1) {
+                failedNames.push(name);
+                return;
+            }
+
+            presence[index].exit = currentTime;
+            if (note) presence[index].note = presence[index].note ? `${presence[index].note} / Sortie: ${note}` : `Sortie: ${note}`;
+            
+            if (timeToMinutes(presence[index].entry) >= timeToMinutes(currentTime)) {
+                 presence[index].exit = null; 
+                 failedNames.push(name + " (Heure invalide)");
+                 return;
+            }
+            successCount++;
+        }
+    });
+    
+    localStorage.setItem(presenceKey, JSON.stringify(presence));
+    document.getElementById('taskNoteQuick').value = '';
+    
+    let message = '';
+    if (successCount > 0) {
+        message += `${successCount} enregistrement(s) ${type === 'in' ? 'ENTRÉE' : 'SORTIE'} réussi(s) à ${currentTime}.`;
+    }
+    if (failedNames.length > 0) {
+        message += (message ? ' | ' : '') + `${failedNames.length} échec(s) (${failedNames.join(', ')}) (Déjà Punché/Non Punché).`;
+    }
+    
+    showToast(message || 'Aucune action effectuée.', 4000);
+
+    checkboxes.forEach(cb => {
+        cb.checked = false;
+        cb.closest('.dropdown-item-label').classList.remove('selected');
+    });
+    updateCustomSelectButton('quick');
+    
+    loadQuickSummary();
+    loadPresence(); 
+    drawCalendar(currentYear, currentMonth); 
+}
+
+function loadQuickSummary() {
+    const ul = document.getElementById('quickSummaryList'); ul.innerHTML = '';
+    const presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    const todayEntries = presence.filter(p => p.date === today && !p.absence).reverse(); 
+    
+    if (todayEntries.length === 0) {
+        ul.innerHTML = '<li style="color: #777; border-left: none; background-color: transparent;">Aucun enregistrement aujourd\'hui.</li>';
+        return;
+    }
+
+    todayEntries.forEach(p => {
+        const li = document.createElement('li');
+        const status = p.exit ? 'Sortie' : 'Entrée (Actif)';
+        const time = p.exit || p.entry;
+        const color = p.exit ? '#4CAF50' : '#FFC107'; 
+        
+        li.style.cssText = `padding: 5px 0; border-bottom: 1px dotted #eee; color: ${color}; border-left: 5px solid ${color}; background-color: #f9f9f9; padding-left: 10px;`;
+        
+        li.textContent = `${p.name} - ${status} à ${time} (${p.note || 'Pas de note'})`;
+        ul.appendChild(li);
+    });
+}
+
+
+// --- Manual/Retroactive Registration ---
+function registerPresence() {
+    const name = document.getElementById('workerSelect').value;
+    const date = document.getElementById('dateSelect').value;
+    const entry = document.getElementById('entryTime').value;
+    const exit = document.getElementById('exitTime').value;
+    const breakStart = document.getElementById('breakStart').value;
+    const breakEnd = document.getElementById('breakEnd').value;
+    const note = document.getElementById('manualNote').value.trim();
+
+    if (!name || !date || !entry || !exit) return showToast('Veuillez remplir le nom، la date، ل\'entrée et la sortie.', 3000);
+    
+    if (timeToMinutes(entry) >= timeToMinutes(exit)) return showToast('ل\'heure d\'entrée doit être antérieure à l\'heure de sortie pour le même jour.', 3000);
+    
+    if ((breakStart && !breakEnd) || (!breakStart && breakEnd)) return showToast('Veuillez spécifier à la fois le début ET la fin de la pause، ou laisser les deux vides.', 4000);
+    if (breakStart && timeToMinutes(breakStart) >= timeToMinutes(breakEnd)) return showToast('Le début de la pause doit être antérieur à la fin de la pause.', 3000);
+    if (breakStart && (timeToMinutes(breakStart) < timeToMinutes(entry) || timeToMinutes(breakEnd) > timeToMinutes(exit))) return showToast('La pause doit être comprise dans la période d\'entrée et de sortie.', 4000);
+
+
+    let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+
+    const newEntry = { date, name, entry, exit, breakStart, breakEnd, note, absence: null };
+
+    if (editingIndex !== null) {
+        if (editingIndex >= 0 && editingIndex < presence.length) {
+            if (presence[editingIndex].name !== name) {
+                 const existingIndexCheck = presence.findIndex(p => p.name === name && p.date === date && !p.absence);
+                 if (existingIndexCheck !== -1) return showToast(`Impossible de changer le nom: ${name} a déjà une saisie le ${date}.`, 5000);
+            }
+            
+            presence[editingIndex] = newEntry;
+            showToast('Saisie mise à jour avec succès.', 3000);
+            exitEditMode();
+        } else {
+            presence.push(newEntry);
+            showToast('Saisie ajoutée (Erreur d\'édition ou index introuvable).', 3000);
+        }
+    } else {
+        const existingIndex = presence.findIndex(p => p.name === name && p.date === date && !p.absence);
+        if (existingIndex !== -1) return showToast('Une saisie existe déjà pour cet employé et cette date. Veuillez éditer l\'entrée existante dans le Tableau.', 5000);
+
+        presence.push(newEntry);
+        showToast('Présence enregistrée avec succès.', 3000);
+    }
+
+    localStorage.setItem(presenceKey, JSON.stringify(presence));
+    clearForm();
+    loadPresence();
+    drawCalendar(currentYear, currentMonth);
+}
+
+
+function editEntry(originalIndex) {
+    let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    
+    if (originalIndex < 0 || originalIndex >= presence.length) {
+        return showToast('Erreur: Index de saisie invalide pour l\'édition.', 3000);
+    }
+    
+    const entry = presence[originalIndex];
+    
+    document.getElementById('workerSelect').value = entry.name;
+    document.getElementById('dateSelect').value = entry.date;
+    document.getElementById('entryTime').value = entry.entry || '';
+    document.getElementById('exitTime').value = entry.exit || '';
+    document.getElementById('breakStart').value = entry.breakStart || '';
+    document.getElementById('breakEnd').value = entry.breakEnd || '';
+    document.getElementById('manualNote').value = entry.note || '';
+
+    editingIndex = originalIndex; 
+    document.getElementById('registerButton').textContent = 'Mettre à Jour la Saisie';
+    document.getElementById('registerButton').style.backgroundColor = '#007bff';
+    
+    showToast(`Édition de la saisie du ${entry.date} pour ${entry.name}.`, 3000);
+    
+    openTab(new Event('click'), 'register');
+    window.scrollTo(0, 0);
+}
+
+function clearForm() {
+    document.getElementById('workerSelect').value = '';
+    document.getElementById('dateSelect').value = today;
+    document.getElementById('entryTime').value = '';
+    document.getElementById('exitTime').value = '';
+    document.getElementById('breakStart').value = '';
+    document.getElementById('breakEnd').value = '';
+    document.getElementById('manualNote').value = '';
+    exitEditMode();
+}
+
+function exitEditMode() {
+    editingIndex = null;
+    document.getElementById('registerButton').textContent = 'Enregistrer la Présence';
+    document.getElementById('registerButton').style.backgroundColor = '#D62828'; 
+}
+
+
+// --- Absence Management ---
+function registerPlannedAbsence() {
+    const name = document.getElementById('absenceWorker').value;
+    const reason = document.getElementById('absenceReason').value;
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+
+    if (!name || !startDate || !endDate) return showToast('Veuillez sélectionner l\'employé et les dates.', 3000);
+    if (new Date(startDate) > new Date(endDate)) return showToast('La date de début ne peut être postérieure à la date de fin.', 3000);
+
+    let plannedAbsence = JSON.parse(localStorage.getItem(plannedAbsenceKey) || '[]');
+    let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+
+    const newAbsence = { name, reason, startDate, endDate };
+    plannedAbsence.push(newAbsence);
+    localStorage.setItem(plannedAbsenceKey, JSON.stringify(plannedAbsence));
+
+    let currentDate = new Date(startDate);
+    const end = new Date(endDate);
+    
+    while (currentDate <= end) {
+        const dateStr = currentDate.toISOString().slice(0, 10);
+        
+        presence = presence.filter(p => !(p.name === name && p.date === dateStr && !p.absence));
+
+        const existingAbsenceIndex = presence.findIndex(p => p.name === name && p.date === dateStr && p.absence);
+        const absenceNote = `Absence planifiée: ${reason}`;
+        
+        if (existingAbsenceIndex === -1) {
+             presence.push({
+                date: dateStr, name: name, entry: null, exit: null, breakStart: null, breakEnd: null,
+                note: absenceNote, absence: reason
+            });
+        } else {
+            presence[existingAbsenceIndex].absence = reason;
+            presence[existingAbsenceIndex].note = absenceNote;
+        }
+        currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    localStorage.setItem(presenceKey, JSON.stringify(presence));
+
+    showToast(`Absence planifiée pour ${name} (${startDate} à ${endDate}) enregistrée.`, 3000);
+    loadPlannedAbsence();
+    drawCalendar(currentYear, currentMonth);
+}
+
+function loadPlannedAbsence() {
+    const ul = document.getElementById('plannedAbsenceList'); ul.innerHTML = '';
+    const plannedAbsence = JSON.parse(localStorage.getItem(plannedAbsenceKey) || '[]')
+        .sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+    
+    if (plannedAbsence.length === 0) {
+        ul.innerHTML = '<li style="color: #777; border-left: none; background-color: transparent;">Aucune absence planifiée.</li>';
+        return;
+    }
+    
+    plannedAbsence.forEach((a, index) => {
+        const li = document.createElement('li');
+        li.textContent = `${a.name} - ${a.reason} du ${a.startDate} au ${a.endDate}`;
+        li.innerHTML += ` <button onclick="deletePlannedAbsence(${index})" class="delete-btn" title="Supprimer"><i class="fas fa-trash-alt"></i></button>`;
+        ul.appendChild(li);
+    });
+}
+
+function deletePlannedAbsence(index) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer cette absence planifiée et toutes les entrées d'absence associées?")) {
+        let plannedAbsence = JSON.parse(localStorage.getItem(plannedAbsenceKey) || '[]');
+        const absenceToDelete = plannedAbsence[index];
+        if (!absenceToDelete) return;
+
+        plannedAbsence.splice(index, 1);
+        localStorage.setItem(plannedAbsenceKey, JSON.stringify(plannedAbsence));
+
+        let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+        presence = presence.filter(p => !(
+            p.name === absenceToDelete.name && 
+            p.date >= absenceToDelete.startDate && 
+            p.date <= absenceToDelete.endDate &&
+            p.absence === absenceToDelete.reason 
+        ));
+        localStorage.setItem(presenceKey, JSON.stringify(presence));
+
+        showToast('Absence planifiée supprimée.', 3000);
+        loadPlannedAbsence();
+        loadPresence();
+        drawCalendar(currentYear, currentMonth);
+    }
+}
+
+
+// ------------------------------------
+// 2. Tab Table (Tableau - Sort, Filter & Load) 
+// ------------------------------------
+function getWeekStart(date) {
+    const d = new Date(date);
+    const day = d.getDay();
+    const diff = d.getDate() - day + (day === 0 ? -6 : 1); // Ajuster pour le lundi (1)
+    return new Date(d.setDate(diff));
+}
+
+function applyDateFilter(filterType) {
+    currentFilter = filterType;
+    loadPresence();
+    // updatePeriodFilterButtonLabel(filterType); // Appelé depuis selectPeriodFilter
+    // showToast(`Filtre de période appliqué: ${filterType}.`, 3000); // Déplacé dans updateSortButtonLabel
+}
+
+function filterPresenceData(data) {
+    let filteredData = data;
+    const currentDate = new Date(today + 'T00:00:00'); 
+    
+    // 1. Filtrage par Période
+    if (currentFilter === 'today') {
+        filteredData = filteredData.filter(p => p.date === today);
+    } else if (currentFilter === 'week') {
+        const weekStart = getWeekStart(currentDate);
+        // La fin de la semaine est le dimanche
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekEnd.getDate() + 6); 
+
+        filteredData = filteredData.filter(p => {
+            const entryDate = new Date(p.date + 'T00:00:00');
+            return entryDate >= weekStart && entryDate <= weekEnd;
+        });
+    } else if (currentFilter === 'month') {
+        const currentMonthStr = today.slice(0, 7); // YYYY-MM
+        filteredData = filteredData.filter(p => p.date.startsWith(currentMonthStr));
+    }
+
+    // 2. Filtrage par Employés (Multi-sélection)
+    // Si selectedTableWorkers est vide، cela signifie "tous" (pas de filtre appliqué)
+    if (selectedTableWorkers.length > 0) {
+        filteredData = filteredData.filter(p => selectedTableWorkers.includes(p.name));
+    }
+
+    return filteredData;
+}
+
+function loadPresence() {
+    const tableBody = document.querySelector('#presenceTable tbody');
+    tableBody.innerHTML = '';
+    
+    let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    
+    // 1. Application des Filtres
+    let filteredPresence = filterPresenceData(presence);
+
+    // 2. Application du Tri
+    filteredPresence.sort((a, b) => {
+        let valA, valB;
+
+        if (currentSortColumn === 'date') {
+            valA = new Date(a.date);
+            valB = new Date(b.date);
+        } else if (currentSortColumn === 'hours') {
+            valA = calculateHours(a.entry, a.exit, a.breakStart, a.breakEnd);
+            valB = calculateHours(b.entry, b.exit, b.breakStart, b.breakEnd);
+        }
+        
+        if (valA < valB) return currentSortDirection === 'asc' ? -1 : 1;
+        if (valA > valB) return currentSortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+    
+    const workersList = getWorkersList();
+
+    if (filteredPresence.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #777; padding: 20px;">Aucune saisie de présence enregistrée pour les filtres actuels.</td></tr>';
+        return;
+    }
+
+    filteredPresence.forEach((p, index) => { 
+        const worker = workersList.find(w => w.name === p.name) || {};
+        const netHours = calculateHours(p.entry, p.exit, p.breakStart, p.breakEnd).toFixed(2);
+        const breakMinutes = calculateBreakMinutes(p.breakStart, p.breakEnd);
+
+        const status = p.absence ? 'Absent - ' + p.absence : (p.exit ? 'Présent' : 'Punch In Actif');
+        
+        let rowClass = '';
+        if (p.absence) {
+            rowClass = 'row-absence';
+        } else if (!p.exit && p.entry) {
+            rowClass = 'row-active-punch';
+        }
+
+        const row = tableBody.insertRow();
+        row.className = rowClass; 
+        
+        row.insertCell().textContent = p.date;
+        row.insertCell().textContent = p.name;
+        row.insertCell().textContent = worker.department || '--';
+        row.insertCell().textContent = p.entry || '--';
+        row.insertCell().textContent = p.exit || '--';
+        row.insertCell().textContent = breakMinutes > 0 ? breakMinutes : '0'; 
+        
+        const netHoursCell = row.insertCell();
+        netHoursCell.textContent = netHours;
+        netHoursCell.style.fontWeight = 'bold'; // Mise en évidence
+        netHoursCell.style.color = netHours > 0 ? '#4CAF50' : '#dc3545';
+        
+        const statusCell = row.insertCell();
+        statusCell.textContent = status;
+        statusCell.style.fontWeight = 'bold';
+        
+        row.insertCell().textContent = p.note || '';
+        
+        // Trouver l'index dans la liste *originale* pour l'édition/suppression
+        const originalPresenceList = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+        // NOTE: Cette méthode de recherche d'index par valeur est lente mais nécessaire car l'index de 'filteredPresence' change.
+        const originalIndex = originalPresenceList.findIndex((item, idx) => 
+            item.date === p.date && 
+            item.name === p.name && 
+            item.entry === p.entry && 
+            item.exit === p.exit &&
+            JSON.stringify(item) === JSON.stringify(p) // S'assurer que c'est la bonne entrée
+        );
+
+        row.insertCell().innerHTML = `
+            <button onclick="editEntry(${originalIndex})" style="width: auto; padding: 3px 8px; background-color: #007bff; margin-bottom: 3px;" title="Éditer"><i class="fas fa-edit"></i></button>
+            <button onclick="deleteEntry(${originalIndex})" class="delete-btn" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
+        `;
+    });
+}
+
+function deleteEntry(originalIndex) {
+    if (confirm("Êtes-vous sûr de vouloir supprimer cette entrée?")) {
+        let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+        
+        if (originalIndex >= 0 && originalIndex < presence.length) {
+            presence.splice(originalIndex, 1);
+            localStorage.setItem(presenceKey, JSON.stringify(presence));
+            showToast('Entrée supprimée.', 3000);
+            loadPresence(); 
+            drawCalendar(currentYear, currentMonth); 
+        } else {
+             showToast('Erreur: Index de suppression invalide.', 3000);
+        }
+    }
+}
+
+
+// ------------------------------------
+// 3. Tab Calendar 
+// ------------------------------------
+function drawCalendar(year, month){
+    const display = document.getElementById('calendarDisplay');
+    const monthYearDisplay = document.getElementById('monthYearDisplay');
+    const selectedWorker = document.getElementById('calendarWorker').value;
+
+    monthYearDisplay.textContent = `${monthNames[month]} ${year}`;
+    display.innerHTML = '';
+    
+    const presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    const firstDayOfMonth = new Date(year, month, 1).getDay(); 
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    const weekDays = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+    weekDays.forEach(day => {
+        const header = document.createElement('div');
+        header.className = 'header';
+        header.textContent = day;
+        display.appendChild(header);
+    });
+
+    const offset = (firstDayOfMonth === 0) ? 6 : firstDayOfMonth - 1; 
+
+    for (let i = 0; i < offset; i++) {
+        const empty = document.createElement('div');
+        empty.className = 'day empty';
+        display.appendChild(empty);
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dayDiv = document.createElement('div');
+        dayDiv.className = 'day';
+        dayDiv.innerHTML = `<small class="date-num">${day}</small>`;
+
+        dayDiv.setAttribute('onclick', `showDayDetails('${dateStr}')`);
+
+        let dayPresence = presence.filter(p => p.date === dateStr);
+        if (selectedWorker !== 'all') {
+            dayPresence = dayPresence.filter(p => p.name === selectedWorker);
+        }
+
+        const isHoliday = isHolidayCheck(dateStr);
+        
+        const isAbsent = dayPresence.some(p => p.absence);
+        const isPresent = dayPresence.some(p => p.entry && p.exit);
+        const isActive = dayPresence.some(p => p.entry && !p.exit);
+
+
+        if (isAbsent) {
+            dayDiv.classList.add('absent');
+            dayDiv.title = 'Absence(s) enregistrée(s)';
+        } else if (isPresent) {
+            dayDiv.classList.add('present');
+            dayDiv.title = 'Présence(s) enregistrée(s)';
+        } else if (isHoliday) {
+            dayDiv.classList.add('holiday'); 
+            dayDiv.title = 'Jour Férié';
+        }
+
+
+        dayPresence.forEach(p => {
+             const summary = document.createElement('small');
+             summary.style.fontSize = '0.65rem';
+             summary.style.display = 'block';
+             summary.style.whiteSpace = 'nowrap';
+             summary.style.overflow = 'hidden';
+             summary.style.textOverflow = 'ellipsis';
+             
+             if (p.absence) {
+                 summary.textContent = `${p.name}: X (${p.absence})`;
+                 summary.style.color = '#dc3545';
+             } else if (p.entry && p.exit) {
+                 const hours = calculateHours(p.entry, p.exit, p.breakStart, p.breakEnd).toFixed(1);
+                 summary.textContent = `${p.name}: ${hours}h Net`;
+                 summary.style.color = '#4CAF50'; 
+             } else if (p.entry && !p.exit) {
+                  summary.textContent = `${p.name}: IN @ ${p.entry}`;
+                  summary.style.color = '#FFC107'; 
+             }
+             
+             dayDiv.appendChild(summary);
+        });
+        
+        if (isHoliday && !isAbsent && !isPresent && !isActive) {
+             const holiday = JSON.parse(localStorage.getItem(holidaysKey) || '[]').find(h => h.date === dateStr);
+             if (holiday) {
+                 const holidayText = document.createElement('small');
+                 holidayText.style.fontSize = '0.7rem';
+                 holidayText.style.display = 'block';
+                 holidayText.style.color = '#FFC107'; 
+                 holidayText.textContent = `Fête: ${holiday.name}`;
+                 dayDiv.appendChild(holidayText);
+             }
+        }
+        
+        display.appendChild(dayDiv);
+    }
+}
+
+function prevMonth() {
+    currentMonth--;
+    if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    drawCalendar(currentYear, currentMonth);
+}
+function nextMonth() {
+    currentMonth++;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    drawCalendar(currentYear, currentMonth);
+}
+
+
+// ------------------------------------
+// 4. Tab Reports & KPIs 
+// ------------------------------------
+function calculateKPIs() {
+    const selectedWorker = document.getElementById('reportsWorkerSelect').value;
+    const allPresence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    let workersList = getWorkersList();
+    
+    let monthlyRecords = allPresence.filter(p => p.date.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`));
+    
+    if (selectedWorker !== 'all') {
+        monthlyRecords = monthlyRecords.filter(p => p.name === selectedWorker);
+        workersList = workersList.filter(w => w.name === selectedWorker);
+    }
+    
+    const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const reportData = {};
+
+    workersList.forEach(worker => {
+        reportData[worker.name] = {
+            totalHours: 0,
+            absenceDays: new Set(),
+            lateEntriesCount: 0,
+            totalLatenessMinutes: 0,
+            presentDays: new Set(),
+            defaultEntry: worker.defaultEntry 
+        };
+    });
+
+    monthlyRecords.forEach(p => {
+        const data = reportData[p.name];
+        if (!data) return; 
+
+        if (p.absence) {
+            data.absenceDays.add(p.date);
+        } else if (p.entry && p.exit) {
+            const hours = calculateHours(p.entry, p.exit, p.breakStart, p.breakEnd);
+            data.totalHours += hours;
+            data.presentDays.add(p.date); 
+
+            const lateness = calculateLateness(p.entry, data.defaultEntry);
+            if (lateness > 0) {
+                data.lateEntriesCount++;
+                data.totalLatenessMinutes += lateness;
+            }
+        }
+    });
+
+    const tableBody = document.querySelector('#monthlyReportTable tbody');
+    tableBody.innerHTML = '';
+    
+    let globalTotalHours = 0;
+    let globalAbsenceDays = 0;
+    let globalPresentDays = 0;
+
+    Object.keys(reportData).forEach(name => {
+        const data = reportData[name];
+        
+        const finalAbsenceDays = Array.from(data.absenceDays).filter(date => !data.presentDays.has(date)).length;
+        
+        const avgLateness = data.lateEntriesCount > 0 
+            ? Math.round(data.totalLatenessMinutes / data.lateEntriesCount) 
+            : 0;
+            
+        const row = tableBody.insertRow();
+        row.insertCell().textContent = name;
+        row.insertCell().textContent = data.totalHours.toFixed(2) + 'h';
+        row.insertCell().textContent = finalAbsenceDays;
+        row.insertCell().textContent = avgLateness + ' min';
+        
+        globalTotalHours += data.totalHours;
+        globalAbsenceDays += finalAbsenceDays;
+        globalPresentDays += data.presentDays.size;
+    });
+    
+    if (workersList.length === 0 || Object.keys(reportData).length === 0) {
+         tableBody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: #777;">Aucune donnée de présence/absence ce mois-ci.</td></tr>`;
+    }
+
+    let totalWorkingDaysInMonth = 0;
+    for (let day = 1; day <= totalDaysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dayOfWeek = date.getDay(); 
+        const dateStr = date.toISOString().slice(0, 10);
+        if (dayOfWeek !== 0 && dayOfWeek !== 6 && !isHolidayCheck(dateStr)) {
+            totalWorkingDaysInMonth++;
+        }
+    }
+    
+    const totalPossibleAttendance = workersList.length * totalWorkingDaysInMonth;
+    
+    const absenceRate = totalPossibleAttendance > 0 ? ((globalAbsenceDays / totalPossibleAttendance) * 100).toFixed(1) : 0;
+    const avgHours = globalPresentDays > 0 ? (globalTotalHours / globalPresentDays).toFixed(2) : 0;
+    
+
+    document.getElementById('kpiAbsenceRate').textContent = absenceRate + '%';
+    document.getElementById('kpiAvgHours').textContent = avgHours + 'h';
+    document.getElementById('kpiTotalHoursMonth').textContent = globalTotalHours.toFixed(2) + 'h';
+}
+
+function drawChart() {
+    const ctx = document.getElementById('hoursChart').getContext('2d');
+    const selectedWorker = document.getElementById('reportsWorkerSelect').value;
+    const allPresence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    
+    let monthlyRecords = allPresence.filter(p => p.date.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`));
+    if (selectedWorker !== 'all') {
+        monthlyRecords = monthlyRecords.filter(p => p.name === selectedWorker);
+    }
+    
+    const workerHours = {};
+    monthlyRecords.forEach(p => {
+        if (p.entry && p.exit) {
+            const hours = calculateHours(p.entry, p.exit, p.breakStart, p.breakEnd);
+            workerHours[p.name] = (workerHours[p.name] || 0) + hours;
+        }
+    });
+
+    const labels = Object.keys(workerHours);
+    const data = Object.values(workerHours).map(h => h.toFixed(2));
+
+    if (chart) chart.destroy();
+    
+    // Configs with standard colors (no dark mode check)
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: `Heures Net (Mois: ${monthNames[currentMonth]} ${currentYear})`,
+                data: data,
+                backgroundColor: 'rgba(214, 40, 40, 0.7)', 
+                borderColor: 'rgba(214, 40, 40, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: { y: { beginAtZero: true, title: { display: true, text: 'Heures Net', color: '#333' } },
+                      x: { ticks: { color: '#333' } } 
+            },
+            plugins: {
+                legend: { labels: { color: '#333' } }
+            }
+        }
+    });
+}
+
+
+// ------------------------------------
+// 5. Tab Profils 
+// ------------------------------------
+function loadWorkerProfile() {
+    const name = document.getElementById('profileWorkerSelect').value;
+    const detailsCard = document.getElementById('workerProfileDetails');
+    
+    if (!name) {
+        detailsCard.classList.add('hidden');
+        if (profileChart) { profileChart.destroy(); profileChart = null; } 
+        return;
+    }
+    
+    detailsCard.classList.remove('hidden');
+
+    const worker = getWorkersList().find(w => w.name === name);
+    if (!worker) return; 
+    
+    document.getElementById('editName').value = worker.name;
+    document.getElementById('editDept').value = worker.department || '';
+    document.getElementById('editEntry').value = worker.defaultEntry || '09:00';
+    document.getElementById('editExit').value = worker.defaultExit || '17:00';
+    document.getElementById('profileImage').src = worker.image || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+    document.getElementById('profileImageUpload').value = null; 
+
+    const allPresence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    const currentMonthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+    const monthlyRecords = allPresence.filter(p => p.name === name && p.date.startsWith(currentMonthStr));
+    
+    const totalDaysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    let totalWorkHours = 0;
+    let punchInCount = 0;
+    let completedPunchCount = 0; 
+    let latenessDaysCount = 0; 
+
+    const uniqueDaysPresent = new Set();
+    const uniqueDaysAbsent = new Set();
+    const processedDates = new Set(); 
+
+    monthlyRecords.forEach(p => {
+        if (!processedDates.has(p.date)) {
+            if (p.absence) {
+                uniqueDaysAbsent.add(p.date);
+            } else if (p.entry) {
+                if (p.exit) {
+                    totalWorkHours += calculateHours(p.entry, p.exit, p.breakStart, p.breakEnd);
+                    completedPunchCount++;
+                    uniqueDaysPresent.add(p.date);
+                    
+                    const lateness = calculateLateness(p.entry, worker.defaultEntry);
+                    if (lateness > 0) {
+                        latenessDaysCount++; 
+                    }
+                }
+                punchInCount++;
+            }
+            processedDates.add(p.date); 
+        }
+    });
+    
+    const finalAbsenceDays = Array.from(uniqueDaysAbsent).filter(date => !uniqueDaysPresent.has(date)).length;
+    
+    let workedDays = uniqueDaysPresent.size;
+    let totalDays = 0;
+    let workingDaysCount = 0;
+    
+    for (let day = 1; day <= totalDaysInMonth; day++) {
+        const date = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const dateObj = new Date(date + 'T00:00:00');
+        const dayOfWeek = dateObj.getDay(); 
+        
+        const isWeekend = dayOfWeek === 0 || dayOfWeek === 6;
+        const isHoliday = isHolidayCheck(date);
+
+        if (!isWeekend && !isHoliday) {
+            workingDaysCount++;
+        }
+        totalDays++;
+    }
+
+    const totalDaysOff = totalDays - workingDaysCount; 
+    const unattendedWorkingDays = workingDaysCount - workedDays - finalAbsenceDays;
+    const unaccountedDays = Math.max(0, unattendedWorkingDays); 
+    
+    const punchRate = punchInCount > 0 ? ((completedPunchCount / punchInCount) * 100).toFixed(0) : 0;
+    
+    document.getElementById('profileTotalHours').textContent = totalWorkHours.toFixed(2) + 'h';
+    document.getElementById('profileAbsenceDays').textContent = finalAbsenceDays;
+    document.getElementById('profilePunchRate').textContent = punchRate + '%';
+    document.getElementById('profileLatenessDays').textContent = latenessDaysCount; 
+    
+    const chartData = {
+        labels: [
+            `Présence (${workedDays}j)`, 
+            `Absence (${finalAbsenceDays}j)`, 
+            `Jours Manqués (${unaccountedDays}j)`,
+            `Jours Repos/Fériés (${totalDaysOff}j)` 
+        ],
+        datasets: [{
+            data: [workedDays, finalAbsenceDays, unaccountedDays, totalDaysOff],
+            backgroundColor: [
+                '#4CAF50', 
+                '#dc3545', 
+                '#FFC107', 
+                '#007bff'  
+            ],
+            hoverBackgroundColor: ['#66bb6a', '#ef5350', '#ffc107', '#2196f3'],
+            borderWidth: 1
+        }]
+    };
+
+    const ctx = document.getElementById('profileAttendanceChart').getContext('2d');
+    
+    if (profileChart) profileChart.destroy();
+    
+    // Configs with standard colors (no dark mode check)
+    profileChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: chartData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: true,
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { 
+                     color: '#333333' 
+                 } },
+                title: { display: false }
+            }
+        }
+    });
+}
+
+function previewProfileImage(event) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('profileImage').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        showToast('Veuillez sélectionner un fichier image valide.', 3000);
+        document.getElementById('profileImage').src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>";
+    }
+}
+
+function saveWorkerProfile() {
+    const oldName = document.getElementById('profileWorkerSelect').value;
+    const newName = document.getElementById('editName').value.trim();
+    const newDept = document.getElementById('editDept').value.trim();
+    const newEntry = document.getElementById('editEntry').value;
+    const newExit = document.getElementById('editExit').value;
+    const newImage = document.getElementById('profileImage').src;
+
+    if (!newName) return showToast('Le nom de l\'employé ne peut pas être vide.', 3000);
+    
+    let workers = getWorkersList();
+    const workerIndex = workers.findIndex(w => w.name === oldName);
+    
+    if (workerIndex === -1) return showToast('Erreur: Employé introuvable.', 3000);
+
+    if (newName !== oldName && workers.some((w, i) => i !== workerIndex && w.name === newName)) {
+        return showToast('Erreur: Le nouveau nom existe déjà pour un autre employé.', 5000);
+    }
+
+    workers[workerIndex].name = newName;
+    workers[workerIndex].department = newDept;
+    workers[workerIndex].defaultEntry = newEntry;
+    workers[workerIndex].defaultExit = newExit;
+    workers[workerIndex].image = newImage;
+    localStorage.setItem(workersKey, JSON.stringify(workers));
+
+    if (newName !== oldName) {
+        let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+        presence.forEach(p => { if (p.name === oldName) p.name = newName; });
+        localStorage.setItem(presenceKey, JSON.stringify(presence));
+
+        let plannedAbsence = JSON.parse(localStorage.getItem(plannedAbsenceKey) || '[]');
+        plannedAbsence.forEach(a => { if (a.name === oldName) a.name = newName; });
+        localStorage.setItem(plannedAbsenceKey, JSON.stringify(plannedAbsence));
+    }
+    
+    showToast(`Profil de ${newName} mis à jour avec succès!`, 3000);
+
+    loadWorkers();
+    loadWorkersIntoSelects();
+    document.getElementById('profileWorkerSelect').value = newName;
+    loadWorkerProfile(); 
+}
+
+
+// --- Tab Export/Backup ---
+function convertToExcelData(data) {
+    const workersList = getWorkersList();
+
+    return data.map(p => {
+        const worker = workersList.find(w => w.name === p.name) || {};
+        return {
+            Date: p.date, 
+            Employé: p.name, 
+            Département: worker.department || '--', 
+            Entrée: p.entry, 
+            Sortie: p.exit,
+            'Début Pause': p.breakStart, 
+            'Fin Pause': p.breakEnd,
+            'Pause (min)': calculateBreakMinutes(p.breakStart, p.breakEnd),
+            'Heures Net': calculateHours(p.entry, p.exit, p.breakStart, p.breakEnd).toFixed(2),
+            Statut: p.absence ? `Absent (${p.absence})` : (p.exit ? 'Présent' : 'Punch In Actif'),
+            Note: p.note
+        };
+    });
+}
+
+function exportDataToExcel(filter) {
+    const allPresence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    let dataToExport = allPresence;
+
+    if (filter === 'month') {
+        const currentMonthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+        dataToExport = allPresence.filter(p => p.date.startsWith(currentMonthStr));
+    }
+
+    if (dataToExport.length === 0) return showToast('Aucune donnée à exporter.', 3000);
+
+    const worksheetData = convertToExcelData(dataToExport);
+    const worksheet = XLSX.utils.json_to_sheet(worksheetData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Présence");
+
+    const date = new Date().toISOString().slice(0, 10);
+    const fileName = `Presence_Export_${date}.xlsx`;
+    XLSX.writeFile(workbook, fileName);
+    showToast(`Données exportées dans ${fileName}`, 3000);
+}
+
+function backupData() {
+    const data = {
+        workers: JSON.parse(localStorage.getItem(workersKey) || '[]'),
+        presence: JSON.parse(localStorage.getItem(presenceKey) || '[]'),
+        plannedAbsence: JSON.parse(localStorage.getItem(plannedAbsenceKey) || '[]'),
+        holidays: JSON.parse(localStorage.getItem(holidaysKey) || '[]'),
+        timestamp: new Date().toISOString()
+    };
+    const jsonStr = JSON.stringify(data, null, 2);
+    const blob = new Blob([jsonStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `SGP_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    showToast('Sauvegarde JSON téléchargée.', 3000);
+}
+
+function restoreData() {
+    const fileInput = document.getElementById('restoreFile');
+    const file = fileInput.files[0];
+
+    if (!file) return showToast('Veuillez sélectionner un fichier JSON de sauvegarde.', 3000);
+    if (!confirm('ATTENTION: Voulez-vous vraiment écraser les données actuelles? Cette action est irréversible.')) return;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        try {
+            const data = JSON.parse(event.target.result);
+            if (data.workers && data.presence) {
+                localStorage.setItem(workersKey, JSON.stringify(data.workers));
+                localStorage.setItem(presenceKey, JSON.stringify(data.presence));
+                localStorage.setItem(plannedAbsenceKey, JSON.stringify(data.plannedAbsence || []));
+                localStorage.setItem(holidaysKey, JSON.stringify(data.holidays || []));
+                showToast('Restauration des données réussie. Veuillez recharger la page.', 5000);
+                setTimeout(() => window.location.reload(), 5000);
+            } else {
+                showToast('Fichier JSON invalide: Manque les clés "workers" ou "presence".', 5000);
+            }
+        } catch (e) {
+            showToast('Erreur lors du traitement du fichier JSON.', 5000);
+            console.error(e);
+        }
+    };
+    reader.readAsText(file);
+}
+
+
+// ------------------------------------
+// Initialisation & Service Worker Setup 
+// ------------------------------------
+window.onload=function(){
+  if (!localStorage.getItem(workersKey)) localStorage.setItem(workersKey, '[]');
+  if (!localStorage.getItem(presenceKey)) localStorage.setItem(presenceKey, '[]');
+  if (!localStorage.getItem(plannedAbsenceKey)) localStorage.setItem(plannedAbsenceKey, '[]');
+  if (!localStorage.getItem(holidaysKey)) localStorage.setItem(holidaysKey, '[]');
+  
+  loadWorkers(); 
+  loadHoliday(); 
+  loadWorkersIntoSelects(); 
+  loadPlannedAbsence(); 
+  
+  document.getElementById('dateSelect').value = today;
+  document.getElementById('startDate').value = today;
+  document.getElementById('endDate').value = today;
+  
+  document.getElementById('employees').classList.remove('hidden'); 
+  document.querySelector('.tab-navigation .tab-button').classList.add('active');
+  
+  drawCalendar(currentYear, currentMonth);
+  updateSortButtonLabel(); // Assurer que le label de tri par défaut est chargé
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', (event) => {
+    const quickSelectContainer = document.getElementById('quickSelectContainer');
+    const tableSelectContainer = document.getElementById('tableSelectContainer');
+    const periodFilterContainer = document.querySelector('.period-filter-dropdown-container'); 
+    const sortFilterContainer = document.querySelector('.sort-filter-dropdown-container');
+    
+    // Fermer la modale si on clique en dehors
+    const modal = document.getElementById('dayDetailsModal');
+    if (modal.style.display === 'block' && event.target === modal) {
+        closeModal();
+    }
+    
+    // Fermer الـ dropdowns
+    if (quickSelectContainer && !quickSelectContainer.contains(event.target)) {
+        closeWorkerDropdown('quick');
+    }
+    if (tableSelectContainer && !tableSelectContainer.contains(event.target)) {
+        closeWorkerDropdown('table');
+    }
+    if (periodFilterContainer && !periodFilterContainer.contains(event.target)) {
+        closePeriodDropdown();
+    }
+    if (sortFilterContainer && !sortFilterContainer.contains(event.target)) {
+        closeSortDropdown();
+    }
+  });
+  
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      // NOTE: Le service worker (sw.js) doit exister à la racine pour cela fonctionne
+      navigator.serviceWorker.register('/sw.js') 
+        .then(registration => {
+          console.log('ServiceWorker registration successful with scope: ', registration.scope);
+          showToast('Application prête pour une utilisation hors ligne.', 3000);
+        })
+        .catch(err => {
+          console.log('ServiceWorker registration failed: ', err);
+        });
+    });
+  }
+};
+</script>
+</body>
+</html>

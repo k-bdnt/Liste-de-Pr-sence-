@@ -1,39 +1,192 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Système de Gestion de Présence Avancé - V3.4 (Tri Unifié)</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-<style>
-/* --- 1. Global & Bold Minimalism Base Styles (Updated Colors) --- */
-body { 
-    font-family: 'Arial', sans-serif; 
-    background-color: #F8F8F8; 
-    color: #333333; 
-    margin: 0; padding: 0; padding-bottom: 70px; 
-    text-align: left; 
-}
-header { 
-    background-color: #D62828; 
-    color: white; 
-    text-align: center; 
-    padding: 1.5rem 1rem; 
-    font-size: 1.8rem; font-weight: bold; 
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); 
-    position: relative; 
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔒 Accès Restreint - Khalid Bdnt</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-main { padding: 30px 20px; max-width: 1000px; margin: 0 auto; } 
-h2 { 
-    color: #D62828; 
-    border-bottom: 1.5px solid #e0e0e0; 
-    padding-bottom: 8px; margin-top: 30px; 
-    font-size: 1.6rem; 
-    font-weight: 700;
-}
-h3 { 
-    color: #007bff; 
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #e74c3c, #c0392b); 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 380px;
+            max-width: 90%;
+            text-align: center;
+            transition: transform 0.5s ease-in-out;
+        }
+        .container.shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
+            20%, 40%, 60%, 80% { transform: translateX(10px); }
+        }
+
+        h2 {
+            color: #2c3e50; 
+            margin-bottom: 25px;
+            font-size: 30px;
+            position: relative;
+        }
+        h2::after {
+            content: '';
+            position: absolute;
+            width: 70px;
+            height: 4px;
+            background-color: #e74c3c;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #444;
+            font-size: 16px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: calc(100% - 28px);
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 17px;
+            direction: ltr;
+            text-align: left;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.3);
+            outline: none;
+        }
+
+        button {
+            background-color: #e74c3c;
+            color: white;
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 19px;
+            width: 100%;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+            letter-spacing: 0.8px;
+        }
+        button:hover {
+            background-color: #c0392b;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
+        }
+
+        #message {
+            margin-top: 30px;
+            font-weight: bold;
+            font-size: 17px;
+        }
+        .error {
+            color: #dc3545;
+            animation: fadeIn 0.5s;
+        }
+        .success {
+            color: #28a745; 
+            animation: fadeIn 0.5s;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container" id="loginForm">
+    <h2>🔑 Accès Sécurisé</h2>
+    <p>Veuillez entrer votre nom d'utilisateur et votre mot de passe pour continuer :</p>
+    
+    <div class="input-group">
+        <label for="usernameInput">Nom d'utilisateur :</label>
+        <input type="text" id="usernameInput" placeholder="Votre nom d'utilisateur" required>
+    </div>
+
+    <div class="input-group">
+        <label for="passwordInput">Mot de passe :</label>
+        <input type="password" id="passwordInput" placeholder="************" required>
+    </div>
+    
+    <button onclick="checkCredentials()">Se Connecter</button>
+
+    <div id="message"></div>
+</div>
+
+<script>
+    // **=======================================================**
+    // ** ! Les identifiants secrets sont ici !         **
+    // ** Nom d'utilisateur: Khalid_Bdnt, Mot de passe: Khalid@Bdnt1 **
+    // **=======================================================**
+    const CORRECT_USERNAME = 'Khalid_Bdnt'; 
+    const CORRECT_PASSWORD = 'Khalid@Bdnt1'; 
+
+    function checkCredentials() {
+        const usernameInput = document.getElementById('usernameInput');
+        const passwordInput = document.getElementById('passwordInput');
+        const messageElement = document.getElementById('message');
+        const loginContainer = document.getElementById('loginForm');
+
+        const enteredUsername = usernameInput.value;
+        const enteredPassword = passwordInput.value;
+
+        messageElement.textContent = '';
+        messageElement.className = '';
+        loginContainer.classList.remove('shake');
+
+        if (enteredUsername === CORRECT_USERNAME && enteredPassword === CORRECT_PASSWORD) {
+            messageElement.className = 'success';
+            messageElement.textContent = '✅ Connexion réussie ! Chargement du contenu...';
+            
+            setTimeout(() => {
+                // 🚀 إعادة التوجيه إلى ملف المحتوى 🚀
+                window.location.href = 'contente.html';
+                
+            }, 1000); 
+        } else {
+            messageElement.className = 'error';
+            messageElement.textContent = "❌ Nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer.";
+            usernameInput.value = ''; 
+            passwordInput.value = ''; 
+            usernameInput.focus(); 
+            loginContainer.classList.add('shake');
+        }
+    }
+</script>
+
+</body>
+</html>
     border-left: 5px solid #007bff; 
     padding-left: 10px; margin-top: 25px; 
     font-size: 1.3rem; 

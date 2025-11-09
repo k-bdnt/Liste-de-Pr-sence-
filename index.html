@@ -1,197 +1,196 @@
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Système de Gestion de Présence Avancé - V3.5 (Dashboard Live)</title>
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<title>نظام إدارة الحضور والغياب</title>
 
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
 </head>
 <body>
 <div id="toast-notification"></div>
 
 <header>
-    Système de Gestion de Présence
+    نظام إدارة الحضور والغياب
+    <button onclick="toggleDarkMode()" 
+            style="position: absolute; left: 15px; top: 10px; 
+                   background: none; border: 1px solid white; 
+                   color: white; padding: 5px 10px; font-size: 1em; 
+                   box-shadow: none !important; transform: none !important;">
+        <i class="fas fa-moon"></i>
+    </button>
 </header>
 <main id="main">
 
 <div id="employees" class="tab-content-card">
-    <h2>🏠 Tableau de Bord (Aperçu du Jour)</h2>
+    <h2>🏠 لوحة القيادة (نظرة عامة)</h2>
     
     <div class="dashboard-section">
-        <h3>📊 Résumé du Jour <small id="currentDateDisplay" style="color: #6c757d; font-size: 0.9em; font-weight: normal;"></small></h3>
+        <h3>📊 ملخص اليوم <small id="currentDateDisplay" style="color: #6c757d; font-size: 0.9em; font-weight: normal;"></small></h3>
         <div class="dashboard-summary-container">
             <div class="kpi-card-dashboard green">
-                <h4>Employés Présents (Punch In Actif)</h4>
+                <h4>موظفون حاضرون (Punch In نشط)</h4>
                 <span id="kpiPresentNow" class="kpi-value-dashboard">0</span>
             </div>
             <div class="kpi-card-dashboard red">
-                <h4>Absences Confirmées</h4>
+                <h4>غيابات مؤكدة</h4>
                 <span id="kpiAbsencesToday" class="kpi-value-dashboard">0</span>
             </div>
             <div class="kpi-card-dashboard yellow">
-                <h4>Total Employés Enregistrés</h4>
+                <h4>إجمالي الموظفين المسجلين</h4>
                 <span id="kpiTotalWorkers" class="kpi-value-dashboard">0</span>
             </div>
         </div>
     </div>
     
     <div class="dashboard-section">
-        <h3>🏃 Qui est présent maintenant? (Punch In Actif)</h3>
-        <ul id="presenceNowList">
-            </ul>
+        <h3>🏃 من هو حاضر الآن؟</h3>
+        <ul id="presenceNowList"></ul>
     </div>
     
     <div class="dashboard-section" style="margin-top: 30px;">
-        <h3>⚠️ Actions En Attente (Saisies Non Clôturées)</h3>
-        <p style="color: #dc3545;">*Saisie **Entrée** des jours précédents sans **Sortie** enregistrée.</p>
-        <ul id="pendingActionsList">
-            </ul>
+        <h3>⚠️ إجراءات مُعلّقة (سجلات غير مغلقة)</h3>
+        <p style="color: #dc3545;">*سجل **دخول** لأيام سابقة بدون **خروج**.</p>
+        <ul id="pendingActionsList"></ul>
     </div>
     
     <hr style="margin-top: 30px; margin-bottom: 30px;">
     
-    <h2>📋 Gestion des Employés & Jours Fériés</h2>
-    <p style="border-bottom: 1px dashed #ccc; padding-bottom: 10px;">**Liste et gestion des employés:**</p>
+    <h2>📋 إدارة الموظفين والأعياد</h2>
+    <p style="border-bottom: 1px dashed #ccc; padding-bottom: 10px;">**قائمة وإدارة الموظفين:**</p>
     <div class="input-group" style="display: block;">
-        <input type="text" id="workerName" placeholder="Nom complet de l'employé">
-        <input type="text" id="workerDepartment" placeholder="Département / Branche">
+        <input type="text" id="workerName" placeholder="الاسم الكامل للموظف">
+        <input type="text" id="workerDepartment" placeholder="القسم / الفرع">
         <div class="input-group" style="margin-top: 5px;">
-             <div><label for="defaultEntry">Entrée par défaut:</label><input type="time" id="defaultEntry" value="09:00"></div>
-            <div><label for="defaultExit">Sortie par défaut:</label><input type="time" id="defaultExit" value="17:00"></div>
+             <div><label for="defaultEntry">دخول افتراضي:</label><input type="time" id="defaultEntry" value="09:00"></div>
+            <div><label for="defaultExit">خروج افتراضي:</label><input type="time" id="defaultExit" value="17:00"></div>
         </div>
-        <button onclick="addWorker()" style="margin-top: 5px;">Ajouter un employé</button>
+        <button onclick="addWorker()" style="margin-top: 5px; background-color: var(--primary-color);">إضافة موظف</button>
     </div>
     <ul id="workerList" style="list-style-type: none; padding: 0;"></ul>
-    <p style="border-bottom: 1px dashed #ccc; padding: 15px 0 10px 0; margin-top: 20px;">**Gestion des jours fériés:**</p>
+    <p style="border-bottom: 1px dashed #ccc; padding: 15px 0 10px 0; margin-top: 20px;">**إدارة الأيام والمناسبات:**</p>
     <div class="input-group" style="display: block;">
         <input type="date" id="holidayDate" style="margin-bottom: 5px;">
-        <input type="text" id="holidayName" placeholder="Nom de la fête (ex: Noël)">
-        <button onclick="addHoliday()" style="margin-top: 5px; background-color: #007bff;">Ajouter un jour férié</button>
+        <input type="text" id="holidayName" placeholder="اسم المناسبة (مثال: عيد الفطر)">
+        <button onclick="addHoliday()" style="margin-top: 5px; background-color: #555;">إضافة مناسبة / يوم عطلة</button>
     </div>
     <ul id="holidayList" style="list-style-type: none; padding: 0;"></ul>
 </div>
 
 <div id="register" class="tab-content-card hidden">
-    <h2>✍️ Saisie de Présence & Absences (Unifiée)</h2>
+    <h2>✍️ تسجيل الحضور والغياب</h2>
     
     <div class="quick-register-card">
-        <h3>⚡ Enregistrement Instantané (Punch In / Punch Out)</h3>
+        <h3>⚡ تسجيل فوري (Punch In / Punch Out)</h3>
         
         <div class="custom-select-container" id="quickSelectContainer">
             <button id="customQuickSelectButton" class="custom-select-button" onclick="toggleWorkerDropdown('quick')">
-                <span id="selectedWorkerCount">-- Sélectionner 0 Employé(s) --</span>
+                <span id="selectedWorkerCount">-- اختر 0 موظف(ين) --</span>
                 <i class="fas fa-caret-down"></i>
             </button>
-            <div id="customQuickWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('quick')">
-                </div>
+            <div id="customQuickWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('quick')"></div>
         </div>
-        <select id="registerQuickWorkerSelect" multiple size="4">
-            <option value="" disabled>-- Sélectionnez votre nom --</option>
-        </select>
         
-        <textarea id="taskNoteQuick" placeholder="Tâche(s) accomplie(s) / Note (Optionnel)"></textarea>
+        <textarea id="taskNoteQuick" placeholder="المهمة(المهام) المنجزة / ملاحظة (اختياري)"></textarea>
         <div class="input-group" style="justify-content: space-between; gap: 10px;">
-            <button onclick="quickPunch('in')" style="flex: 1;"><i class="fas fa-arrow-circle-right"></i> ENTRÉE</button>
-            <button onclick="quickPunch('out')" style="flex: 1;"><i class="fas fa-arrow-circle-left"></i> SORTIE</button>
+            <button onclick="quickPunch('in')" style="flex: 1; background-color: var(--success-color);"><i class="fas fa-arrow-circle-right"></i> دخول</button>
+            <button onclick="quickPunch('out')" style="flex: 1; background-color: var(--danger-color);"><i class="fas fa-arrow-circle-left"></i> خروج</button>
         </div>
-        <p style="font-size: 0.9em; color: #777; margin-top: 15px;">L'heure actuelle est enregistrée automatiquement.</p>
+        <p style="font-size: 0.9em; color: #777; margin-top: 15px;">يتم تسجيل الوقت الحالي تلقائياً.</p>
     </div>
     <div style="margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px;">
-        <h3>Résumé des entrées instantanées d'aujourd'hui:</h3>
+        <h3>ملخص الإدخالات الفورية لليوم:</h3>
         <ul id="quickSummaryList" style="list-style-type: none; padding: 0;"></ul>
     </div>
     <hr style="margin-top: 30px; margin-bottom: 30px;">
     <div class="manual-register-section">
-        <h3>🕰️ Saisie Manuelle ou Rétroactive</h3>
+        <h3>🕰️ تسجيل يدوي أو بأثر رجعي</h3>
         <div class="input-group">
-            <div><label for="workerSelect">Employé:</label><select id="workerSelect"><option value="" disabled selected>-- Sélectionner --</option></select></div>
-            <div><label for="dateSelect">Date:</label><input type="date" id="dateSelect"></div>
+            <div><label for="workerSelect">الموظف:</label><select id="workerSelect"><option value="" disabled selected>-- اختر --</option></select></div>
+            <div><label for="dateSelect">التاريخ:</label><input type="date" id="dateSelect"></div>
         </div>
         <div class="input-group">
-            <div><label for="entryTime">Heure d'Entrée:</label><input type="time" id="entryTime"></div>
-            <div><label for="exitTime">Heure de Sortie:</label><input type="time" id="exitTime"></div>
+            <div><label for="entryTime">وقت الدخول:</label><input type="time" id="entryTime"></div>
+            <div><label for="exitTime">وقت الخروج:</label><input type="time" id="exitTime"></div>
         </div>
         <div class="input-group">
-            <div><label for="breakStart">Début Pause (Optionnel):</label><input type="time" id="breakStart"></div>
-            <div><label for="breakEnd">Fin Pause (Optionnel):</label><input type="time" id="breakEnd"></div>
+            <div><label for="breakStart">بداية الاستراحة (اختياري):</label><input type="time" id="breakStart"></div>
+            <div><label for="breakEnd">نهاية الاستراحة (اختياري):</label><input type="time" id="breakEnd"></div>
         </div>
-        <textarea id="manualNote" placeholder="Tâches spécifiques ou note pour cette saisie (Optionnel)"></textarea>
-        <button id="registerButton" onclick="registerPresence()">Enregistrer la Présence</button>
-        <button onclick="clearForm()" style="background-color: #6c757d; margin-top: 5px;">Annuler / Nouveau Formulaire</button>
+        <textarea id="manualNote" placeholder="ملاحظة خاصة بهذا السجل (اختياري)"></textarea>
+        <button id="registerButton" onclick="registerPresence()">تسجيل الحضور</button>
+        <button onclick="clearForm()" style="background-color: #6c757d; margin-top: 5px;">إلغاء / نموذج جديد</button>
     </div>
     <hr style="margin-top: 30px; margin-bottom: 30px;">
     <div class="absence-section">
-        <h3>❌ Gérer les Absences & Congés (Planifié ou pour un jour)</h3>
+        <h3>❌ إدارة الغيابات والإجازات (مُخطط لها)</h3>
         <div class="input-group">
-            <div><label for="absenceWorker">Employé:</label><select id="absenceWorker"><option value="" disabled selected>-- Sélectionner --</option></select></div>
-            <div><label for="absenceReason">Motif:</label><select id="absenceReason">
-                <option value="Maladie">Maladie</option><option value="Permission">Permission</option>
-                <option value="Conge_Annuel">Congé Annuel</option><option value="Autre">Autre</option>
+            <div><label for="absenceWorker">الموظف:</label><select id="absenceWorker"><option value="" disabled selected>-- اختر --</option></select></div>
+            <div><label for="absenceReason">السبب:</label><select id="absenceReason">
+                <option value="Maladie">مرضي</option><option value="Permission">إذن</option>
+                <option value="Conge_Annuel">إجازة سنوية</option><option value="Autre">أخرى</option>
             </select></div>
         </div>
-        <p style="margin-top: 15px; margin-bottom: 5px;">**Période de l'absence:**</p>
+        <p style="margin-top: 15px; margin-bottom: 5px;">**فترة الغياب:**</p>
         <div class="input-group">
-            <div><label for="startDate">Date Début:</label><input type="date" id="startDate"></div>
-            <div><label for="endDate">Date Fin (Même date si un seul jour):</label><input type="date" id="endDate"></div>
+            <div><label for="startDate">تاريخ البداية:</label><input type="date" id="startDate"></div>
+            <div><label for="endDate">تاريخ النهاية (نفس التاريخ ليوم واحد):</label><input type="date" id="endDate"></div>
         </div>
-        <button onclick="registerPlannedAbsence()" style="background-color: #d32f2f;">Planifier/Enregistrer l'Absence</button>
-        <p style="margin-top: 25px; border-top: 1px dashed #ddd; padding-top: 10px;">**Absences planifiées existantes:**</p>
+        <button onclick="registerPlannedAbsence()" style="background-color: var(--danger-color);">تسجيل / تخطيط الغياب</button>
+        <p style="margin-top: 25px; border-top: 1px dashed #ddd; padding-top: 10px;">**الغيابات المخطط لها:**</p>
         <ul id="plannedAbsenceList" style="list-style-type: none; padding: 0;"></ul>
     </div>
 </div>
 
 <div id="table" class="tab-content-card hidden">
-    <h2>📊 Tableau des Saisies</h2>
+    <h2>📊 جدول السجلات</h2>
     
     <div class="filter-controls">
-        <h3><i class="fas fa-filter"></i> Filtres du Tableau</h3>
+        <h3><i class="fas fa-filter"></i> فلاتر الجدول</h3>
         
         <div class="filter-group period-filters">
-            <label style="margin-right: 15px;">Filtrer par Période:</label>
+            <label style="margin-right: 15px;">تصفية حسب الفترة:</label>
             <div class="period-filter-dropdown-container">
                  <button id="periodFilterButton" onclick="togglePeriodDropdown()">
                     <i class="fas fa-calendar-alt"></i> 
-                    <span id="currentPeriodLabel">Toute la Période</span> 
+                    <span id="currentPeriodLabel">كل الفترة</span> 
                     <i class="fas fa-caret-down"></i>
                  </button>
                  <div id="periodFilterDropdown" class="hidden">
-                    <div class="period-filter-option" data-filter="today" onclick="selectPeriodFilter('today')"><i class="fas fa-calendar-day" style="color:#28a745;"></i> Aujourd'hui</div>
-                    <div class="period-filter-option" data-filter="week" onclick="selectPeriodFilter('week')"><i class="fas fa-calendar-week" style="color:#ffc107;"></i> Cette Semaine</div>
-                    <div class="period-filter-option" data-filter="month" onclick="selectPeriodFilter('month')"><i class="fas fa-calendar-alt" style="color:#007bff;"></i> Ce Mois</div>
-                    <div class="period-filter-option active" data-filter="all" onclick="selectPeriodFilter('all')"><i class="fas fa-infinity" style="color:#6c757d;"></i> Toute la Période</div>
+                    <div class="period-filter-option" data-filter="today" onclick="selectPeriodFilter('today')"><i class="fas fa-calendar-day" style="color:#28a745;"></i> اليوم</div>
+                    <div class="period-filter-option" data-filter="week" onclick="selectPeriodFilter('week')"><i class="fas fa-calendar-week" style="color:#ffc107;"></i> هذا الأسبوع</div>
+                    <div class="period-filter-option" data-filter="month" onclick="selectPeriodFilter('month')"><i class="fas fa-calendar-alt" style="color:#007bff;"></i> هذا الشهر</div>
+                    <div class="period-filter-option active" data-filter="all" onclick="selectPeriodFilter('all')"><i class="fas fa-infinity" style="color:#6c757d;"></i> كل الفترة</div>
                  </div>
             </div>
         </div>
 
         <div class="filter-group" style="display: block;">
-            <label style="display: block; margin-bottom: 5px; margin-top: 10px;">Filtrer par Employés (Multi-sélection):</label>
+            <label style="display: block; margin-bottom: 5px; margin-top: 10px;">تصفية حسب الموظفين:</label>
             <div class="custom-select-container" id="tableSelectContainer">
                 <button id="customTableSelectButton" class="custom-select-button" onclick="toggleWorkerDropdown('table')">
-                    <span id="selectedTableWorkerCount">-- Tous les employés (0) --</span>
+                    <span id="selectedTableWorkerCount">-- جميع الموظفين (0) --</span>
                     <i class="fas fa-caret-down"></i>
                 </button>
-                <div id="customTableWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('table')">
-                    </div>
+                <div id="customTableWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('table')"></div>
             </div>
         </div>
     </div>
 
     <div class="sort-controls">
-        <h3><i class="fas fa-sort"></i> Options de Tri</h3>
+        <h3><i class="fas fa-sort"></i> خيارات الفرز</h3>
         <div class="sort-filter-dropdown-container">
             <button id="sortFilterButton" onclick="toggleSortDropdown()">
-                <span id="currentSortLabel">Date (Récents)</span>
+                <span id="currentSortLabel">التاريخ (الأحدث)</span>
                 <i class="fas fa-caret-down"></i>
             </button>
             <div id="sortFilterDropdown" class="hidden">
-                 <div class="sort-filter-option active" data-column="date" data-direction="desc" onclick="selectSortOption('date', 'desc', 'Date (Récents)')"><i class="fas fa-sort-numeric-down"></i> Date (Récents)</div>
-                 <div class="sort-filter-option" data-column="date" data-direction="asc" onclick="selectSortOption('date', 'asc', 'Date (Anciens)')"><i class="fas fa-sort-numeric-up"></i> Date (Anciens)</div>
-                 <div class="sort-filter-option" data-column="hours" data-direction="desc" onclick="selectSortOption('hours', 'desc', 'Heures Net (Max)')"><i class="fas fa-sort-amount-down" style="color: #4CAF50;"></i> Heures Net (Max)</div>
-                 <div class="sort-filter-option" data-column="hours" data-direction="asc" onclick="selectSortOption('hours', 'asc', 'Heures Net (Min)')"><i class="fas fa-sort-amount-up" style="color: #4CAF50;"></i> Heures Net (Min)</div>
+                 <div class="sort-filter-option active" data-column="date" data-direction="desc" onclick="selectSortOption('date', 'desc', 'التاريخ (الأحدث)')"><i class="fas fa-sort-numeric-down"></i> التاريخ (الأحدث)</div>
+                 <div class="sort-filter-option" data-column="date" data-direction="asc" onclick="selectSortOption('date', 'asc', 'التاريخ (الأقدم)')"><i class="fas fa-sort-numeric-up"></i> التاريخ (الأقدم)</div>
+                 <div class="sort-filter-option" data-column="hours" data-direction="desc" onclick="selectSortOption('hours', 'desc', 'صافي الساعات (الأقصى)')"><i class="fas fa-sort-amount-down" style="color: #4CAF50;"></i> صافي الساعات (الأقصى)</div>
+                 <div class="sort-filter-option" data-column="hours" data-direction="asc" onclick="selectSortOption('hours', 'asc', 'صافي الساعات (الأدنى)')"><i class="fas fa-sort-amount-up" style="color: #4CAF50;"></i> صافي الساعات (الأدنى)</div>
             </div>
         </div>
     </div>
@@ -200,16 +199,16 @@
         <table id="presenceTable">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>Nom</th>
-                    <th>Département</th>
-                    <th>Entrée</th>
-                    <th>Sortie</th>
-                    <th>Pause (min)</th>
-                    <th>H. Net</th>
-                    <th>Statut</th>
-                    <th>Note</th>
-                    <th>Actions</th>
+                    <th>التاريخ</th>
+                    <th>الاسم</th>
+                    <th>القسم</th>
+                    <th>دخول</th>
+                    <th>خروج</th>
+                    <th>استراحة (دقيقة)</th>
+                    <th>صافي س.</th>
+                    <th>الحالة</th>
+                    <th>ملاحظة</th>
+                    <th>إجراءات</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -218,108 +217,100 @@
 </div>
 
 <div id="calendar" class="tab-content-card hidden">
-    <h2>📅 Calendrier de Présence (Cliquez sur un jour pour les détails)</h2>
-    <select id="calendarWorker" onchange="drawCalendar(currentYear, currentMonth)"><option value="all">Tous les employés</option></select>
+    <h2>📅 تقويم الحضور (انقر على يوم للتفاصيل)</h2>
+    <select id="calendarWorker" onchange="drawCalendar(currentYear, currentMonth)"><option value="all">جميع الموظفين</option></select>
     <div class="calendar-controls">
-        <button onclick="prevMonth()" style="width: auto; background-color: #555;"><i class="fas fa-chevron-left"></i> Précédent</button>
+        <button onclick="prevMonth()" style="width: auto; background-color: #555;"><i class="fas fa-chevron-right"></i> السابق</button>
         <h3 id="monthYearDisplay"></h3>
-        <button onclick="nextMonth()" style="width: auto; background-color: #555;">Suivant <i class="fas fa-chevron-right"></i></button>
+        <button onclick="nextMonth()" style="width: auto; background-color: #555;">التالي <i class="fas fa-chevron-left"></i></button>
     </div>
     <div id="calendarDisplay" class="calendar month-view"></div>
 </div>
 
 <div id="reports" class="tab-content-card hidden">
-    <h2>📈 Analyse, Rapports & KPIs</h2>
-    <p>Sélectionnez un employé ou "Tous" pour filtrer les rapports:</p>
+    <h2>📈 تحليل وتقارير ومؤشرات أداء (KPIs)</h2>
+    <p>اختر موظفًا أو "الكل" لتصفية التقارير:</p>
     <select id="reportsWorkerSelect" onchange="calculateKPIs(); drawChart();">
-        <option value="all">Tous les employés</option>
+        <option value="all">جميع الموظفين</option>
     </select>
     
     <div class="kpi-container" style="margin-top: 25px;">
         <div class="kpi-card">
-            <h4>Taux d'Absence Global (Mois)</h4>
+            <h4>معدل الغياب العام (شهري)</h4>
             <span id="kpiAbsenceRate" class="kpi-value">--%</span>
         </div>
         <div class="kpi-card">
-            <h4>Moyenne H. Net par Jour (Mois)</h4>
-            <span id="kpiAvgHours" class="kpi-value">-- h</span>
+            <h4>متوسط صافي س. في اليوم (شهري)</h4>
+            <span id="kpiAvgHours" class="kpi-value">-- س</span>
         </div>
         <div class="kpi-card">
-            <h4>Total Heures Net (Mois)</h4>
-            <span id="kpiTotalHoursMonth" class="kpi-value">-- h</span>
+            <h4>إجمالي صافي الساعات (شهري)</h4>
+            <span id="kpiTotalHoursMonth" class="kpi-value">-- س</span>
         </div>
     </div>
     
-    <h3 style="margin-top: 30px;">Synthèse de Performance Mensuelle par Employé</h3>
+    <h3 style="margin-top: 30px;">ملخص الأداء الشهري حسب الموظف</h3>
     <div class="table-container">
         <table id="monthlyReportTable" style="width: 100%;">
             <thead>
                 <tr>
-                    <th>Employé</th>
-                    <th>Total Heures (Mois)</th>
-                    <th>Jours d'Absence</th>
-                    <th>Moy. Retard Entrée</th>
+                    <th>الموظف</th>
+                    <th>إجمالي الساعات (شهري)</th>
+                    <th>أيام الغياب</th>
+                    <th>متوسط تأخير الدخول</th>
                 </tr>
             </thead>
-            <tbody></tobody>
+            <tbody></tbody>
         </table>
     </div>
 
-    <h3 style="margin-top: 30px;">Graphique d'Heures de Travail par Employé</h3>
+    <h3 style="margin-top: 30px;">مخطط ساعات العمل حسب الموظف</h3>
     <canvas id="hoursChart" style="margin-top: 10px;"></canvas>
 </div>
 
 <div id="profile" class="tab-content-card hidden">
-    <h2>👤 Détails du Profil & Modification</h2>
-    <p>Sélectionnez un employé pour visualiser/modifier ses informations:</p>
-    <select id="profileWorkerSelect" onchange="loadWorkerProfile()"><option value="" disabled selected>Sélectionner un employé</option></select>
+    <h2>👤 تفاصيل الملف الشخصي والتعديل</h2>
+    <p>اختر موظفًا لعرض/تعديل معلوماته:</p>
+    <select id="profileWorkerSelect" onchange="loadWorkerProfile()"><option value="" disabled selected>اختر موظفًا</option></select>
     
     <div id="workerProfileDetails" class="profile-details-card hidden" style="border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-top: 15px; background-color: #fcfcfc;">
-        <div class="profile-image-container">
-            <img id="profileImage" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Image Profil">
-            <input type="file" id="profileImageUpload" accept="image/*" style="margin-top: 10px; width: auto; padding: 5px;" onchange="previewProfileImage(event)">
-        </div>
         
-        <h3 style="margin-top: 15px;">⚙️ Informations de base</h3>
-        <label for="editName">Nom Complet:</label>
-        <input type="text" id="editName" placeholder="Nouveau Nom">
+        <h3 style="margin-top: 15px;">⚙️ المعلومات الأساسية</h3>
+        <label for="editName">الاسم الكامل:</label>
+        <input type="text" id="editName" placeholder="الاسم الجديد">
         
-        <label for="editDept">Département:</label>
-        <input type="text" id="editDept" placeholder="Nouveau Département">
+        <label for="editDept">القسم:</label>
+        <input type="text" id="editDept" placeholder="القسم الجديد">
         
         <div class="input-group">
-            <div><label for="editEntry">Entrée par défaut:</label><input type="time" id="editEntry"></div>
-            <div><label for="editExit">Sortie par défaut:</label><input type="time" id="editExit"></div>
+            <div><label for="editEntry">دخول افتراضي:</label><input type="time" id="editEntry"></div>
+            <div><label for="editExit">خروج افتراضي:</label><input type="time" id="editExit"></div>
         </div>
         
-        <button onclick="saveWorkerProfile()" style="background-color: #4CAF50; margin-top: 15px;"><i class="fas fa-save"></i> Sauvegarder les Modifications</button>
+        <button onclick="saveWorkerProfile()" style="background-color: var(--success-color); margin-top: 15px;"><i class="fas fa-save"></i> حفظ التعديلات</button>
 
         <hr style="margin: 30px 0;">
         
-        <h3 style="margin-top: 0;">🎯 Performance du Mois</h3>
+        <h3 style="margin-top: 0;">🎯 أداء الشهر</h3>
         
         <div class="profile-kpi-container">
             <div class="profile-kpi-card">
-                <h4><i class="fas fa-hourglass-half profile-icon" style="color:#007bff;"></i> Total Heures Net</h4>
-                <span id="profileTotalHours" class="profile-value">0.00h</span>
+                <h4><i class="fas fa-hourglass-half profile-icon" style="color:#007bff;"></i> إجمالي صافي الساعات</h4>
+                <span id="profileTotalHours" class="profile-value">0.00 س</span>
             </div>
             <div class="profile-kpi-card">
-                <h4><i class="fas fa-percentage profile-icon" style="color:#4CAF50;"></i> Taux de Punch</h4>
-                <span id="profilePunchRate" class="profile-value">--%</span>
-            </div>
-            <div class="profile-kpi-card">
-                <h4><i class="fas fa-calendar-times profile-icon" style="color:#dc3545;"></i> Jours d'Absence (Net)</h4>
+                <h4><i class="fas fa-calendar-times profile-icon" style="color:#dc3545;"></i> أيام الغياب (صافي)</h4>
                 <span id="profileAbsenceDays" class="profile-value">0</span>
             </div>
              <div class="profile-kpi-card">
-                <h4><i class="fas fa-stopwatch profile-icon" style="color:#FFC107;"></i> Jours de Retard</h4>
+                <h4><i class="fas fa-stopwatch profile-icon" style="color:#FFC107;"></i> أيام التأخير</h4>
                 <span id="profileLatenessDays" class="profile-value">0</span> 
             </div>
         </div>
 
         <hr style="margin: 30px 0;">
 
-        <h3 style="margin-top: 0;">📈 Analyse d'Assiduité (Mois Actuel)</h3>
+        <h3 style="margin-top: 0;">📈 تحليل الحضور (الشهر الحالي)</h3>
         <div style="width: 100%; max-width: 300px; margin: 15px auto;">
             <canvas id="profileAttendanceChart"></canvas>
         </div>
@@ -327,26 +318,26 @@
 </div>
 
 <div id="export" class="tab-content-card hidden">
-    <h2>💾 Exportation et Sauvegarde</h2>
-    <p>Utilisez ces boutons pour sauvegarder vos données ou les exporter au format Excel (.xlsx).</p>
-    <button onclick="exportDataToExcel('all')" style="background-color: #1e7e34;"><i class="fas fa-file-excel"></i> Exporter TOUTES les Saisies (Excel)</button>
-    <p style="margin-top: 20px;">**Sauvegarde de la configuration actuelle:**</p>
-    <button onclick="backupData()" style="background-color: #555;"><i class="fas fa-cloud-download-alt"></i> Sauvegarder (Télécharger le JSON)</button>
-    <p style="margin-top: 20px;">**Restaurer les données:**</p>
+    <h2>💾 التصدير والنسخ الاحتياطي</h2>
+    <p>استخدم هذه الأزرار لحفظ بياناتك أو تصديرها بصيغة Excel (.xlsx).</p>
+    <button onclick="exportDataToExcel('all')" style="background-color: #1e7e34;"><i class="fas fa-file-excel"></i> تصدير كل السجلات (Excel)</button>
+    <p style="margin-top: 20px;">**نسخ احتياطي للإعدادات والبيانات:**</p>
+    <button onclick="backupData()" style="background-color: #555;"><i class="fas fa-cloud-download-alt"></i> نسخ احتياطي (تنزيل JSON)</button>
+    <p style="margin-top: 20px;">**استعادة البيانات:**</p>
     <input type="file" id="restoreFile" accept=".json" style="margin-bottom: 10px;">
-    <button onclick="restoreData()" style="background-color: #dc3545;"><i class="fas fa-upload"></i> Restaurer (Importer le JSON)</button>
+    <button onclick="restoreData()" style="background-color: var(--danger-color);"><i class="fas fa-upload"></i> استعادة (استيراد JSON)</button>
 </div>
 
 </main>
 
 <div class="tab-navigation">
-    <button class="tab-button active" onclick="openTab(event, 'employees')"><i class="fas fa-home"></i> Accueil</button>
-    <button class="tab-button" onclick="openTab(event, 'register')"><i class="fas fa-sign-in-alt"></i> Saisie</button>
-    <button class="tab-button" onclick="openTab(event, 'table')"><i class="fas fa-list-alt"></i> Tableau</button>
-    <button class="tab-button" onclick="openTab(event, 'calendar')"><i class="fas fa-calendar-alt"></i> Calendrier</button>
-    <button class="tab-button" onclick="openTab(event, 'reports')"><i class="fas fa-chart-line"></i> Rapports</button>
-    <button class="tab-button" onclick="openTab(event, 'profile')"><i class="fas fa-user-circle"></i> Profil</button>
-    <button class="tab-button" onclick="openTab(event, 'export')"><i class="fas fa-file-export"></i> Export</button>
+    <button class="tab-button active" onclick="openTab(event, 'employees')"><i class="fas fa-home"></i> الرئيسية</button>
+    <button class="tab-button" onclick="openTab(event, 'register')"><i class="fas fa-sign-in-alt"></i> تسجيل</button>
+    <button class="tab-button" onclick="openTab(event, 'table')"><i class="fas fa-list-alt"></i> جدول</button>
+    <button class="tab-button" onclick="openTab(event, 'calendar')"><i class="fas fa-calendar-alt"></i> تقويم</button>
+    <button class="tab-button" onclick="openTab(event, 'reports')"><i class="fas fa-chart-line"></i> تقارير</button>
+    <button class="tab-button" onclick="openTab(event, 'profile')"><i class="fas fa-user-circle"></i> بروفايل</button>
+    <button class="tab-button" onclick="openTab(event, 'export')"><i class="fas fa-file-export"></i> تصدير</button>
 </div>
 
 <div id="dayDetailsModal" class="modal" onclick="if(event.target === this) closeModal()">
@@ -355,15 +346,13 @@
         <h3 id="modalDateTitle"></h3>
         <p style="font-weight: bold;" id="modalHolidayInfo"></p>
         <hr>
-        <h4>Détails de Présence/Absence:</h4>
-        <ul id="modalDetailsList" style="list-style-type: none; padding: 0;">
-            </ul>
+        <h4>تفاصيل الحضور/الغياب:</h4>
+        <ul id="modalDetailsList" style="list-style-type: none; padding: 0;"></ul>
     </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script src="script.js"></script>
 
 </body>

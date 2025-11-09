@@ -1,6 +1,31 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
+<head><!DOCTYPE html>
+<html lang="fr" dir="ltr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bienvenue - Accès Sécurisé</title>
+    
+    <script>
+        // هذا الكود يوجه المستخدم إلى صفحة الدخول (login.html) إذا لم يأت منها.
+        const referrer = document.referrer;
+        
+        // التحقق من أن المستخدم لم يأت من صفحة الدخول
+        if (!referrer.includes('login.html')) {
+            // توجيه المستخدم فوراً إلى صفحة الدخول
+            window.location.replace('login.html');
+        }
+    </script>
+    </head>
+<body>
+
+    <h1>Bienvenue, Accès Sécurisé Réussi !</h1>
+    <p>Ceci est le contenu de votre page protégée (index.html).</p>
+    
+
+</body>
+</html>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Système de Gestion de Présence Avancé - V3.5 (Dashboard Live)</title>

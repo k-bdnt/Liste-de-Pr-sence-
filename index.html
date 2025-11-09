@@ -1,108 +1,80 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système de Gestion de Présence Avancé - V3.5 (Dashboard Live)</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Système de Gestion de Présence Avancé</title>
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
 </head>
 <body>
-<div id="toast-notification"></div>
 
 <header>
     Système de Gestion de Présence
 </header>
-<main id="main">
 
-<div id="employees" class="tab-content-card">
-    <h2>🏠 Tableau de Bord (Aperçu du Jour)</h2>
-    
-    <div class="dashboard-section">
-        <h3>📊 Résumé du Jour <small id="currentDateDisplay" style="color: #6c757d; font-size: 0.9em; font-weight: normal;"></small></h3>
-        <div class="dashboard-summary-container">
-            <div class="kpi-card-dashboard green">
-                <h4>Employés Présents (Punch In Actif)</h4>
-                <span id="kpiPresentNow" class="kpi-value-dashboard">0</span>
-            </div>
-            <div class="kpi-card-dashboard red">
-                <h4>Absences Confirmées</h4>
-                <span id="kpiAbsencesToday" class="kpi-value-dashboard">0</span>
-            </div>
-            <div class="kpi-card-dashboard yellow">
-                <h4>Total Employés Enregistrés</h4>
-                <span id="kpiTotalWorkers" class="kpi-value-dashboard">0</span>
-            </div>
-        </div>
+<main>
+    <div id="employees" class="tab-content-card">
+        ...
     </div>
-    
-    <div class="dashboard-section">
-        <h3>🏃 Qui est présent maintenant? (Punch In Actif)</h3>
-        <ul id="presenceNowList">
+
+    <div id="register" class="tab-content-card hidden">
+        ...
+    </div>
+
+    </main>
+
+<nav class="tab-navigation">
+    <button class="tab-button active" onclick="openTab(event, 'employees')">
+        <i class="fas fa-chart-line"></i>
+        <span>لوحة التحكم</span>
+    </button>
+    <button class="tab-button" onclick="openTab(event, 'register')">
+        <i class="fas fa-clock"></i>
+        <span>تسجيل / غياب</span>
+    </button>
+    <button class="tab-button" onclick="openTab(event, 'table')">
+        <i class="fas fa-table"></i>
+        <span>الجدول</span>
+    </button>
+    <button class="tab-button" onclick="openTab(event, 'calendar')">
+        <i class="fas fa-calendar-alt"></i>
+        <span>التقويم</span>
+    </button>
+    <button class="tab-button" onclick="openTab(event, 'reports')">
+        <i class="fas fa-chart-bar"></i>
+        <span>تقارير</span>
+    </button>
+    <button class="tab-button" onclick="openTab(event, 'profile')">
+        <i class="fas fa-user-circle"></i>
+        <span>ملف شخصي</span>
+    </button>
+</nav>
+
+<div id="toast-notification"></div>
+
+<div id="dayDetailsModal" class="modal" onclick="closeModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-button" onclick="closeModal()">&times;</span>
+        <h3 id="modalDateTitle" style="color:#D62828;"></h3>
+        <p id="modalHolidayInfo" style="margin-bottom: 15px;"></p>
+        <ul id="modalDetailsList" style="list-style-type: none; padding: 0;">
             </ul>
+        <button onclick="closeModal()" style="margin-top: 15px;">إغلاق</button>
     </div>
-    
-    <div class="dashboard-section" style="margin-top: 30px;">
-        <h3>⚠️ Actions En Attente (Saisies Non Clôturées)</h3>
-        <p style="color: #dc3545;">*Saisie **Entrée** des jours précédents sans **Sortie** enregistrée.</p>
-        <ul id="pendingActionsList">
-            </ul>
-    </div>
-    
-    <hr style="margin-top: 30px; margin-bottom: 30px;">
-    
-    <h2>📋 Gestion des Employés & Jours Fériés</h2>
-    <p style="border-bottom: 1px dashed #ccc; padding-bottom: 10px;">**Liste et gestion des employés:**</p>
-    <div class="input-group" style="display: block;">
-        <input type="text" id="workerName" placeholder="Nom complet de l'employé">
-        <input type="text" id="workerDepartment" placeholder="Département / Branche">
-        <div class="input-group" style="margin-top: 5px;">
-             <div><label for="defaultEntry">Entrée par défaut:</label><input type="time" id="defaultEntry" value="09:00"></div>
-            <div><label for="defaultExit">Sortie par défaut:</label><input type="time" id="defaultExit" value="17:00"></div>
-        </div>
-        <button onclick="addWorker()" style="margin-top: 5px;">Ajouter un employé</button>
-    </div>
-    <ul id="workerList" style="list-style-type: none; padding: 0;"></ul>
-    <p style="border-bottom: 1px dashed #ccc; padding: 15px 0 10px 0; margin-top: 20px;">**Gestion des jours fériés:**</p>
-    <div class="input-group" style="display: block;">
-        <input type="date" id="holidayDate" style="margin-bottom: 5px;">
-        <input type="text" id="holidayName" placeholder="Nom de la fête (ex: Noël)">
-        <button onclick="addHoliday()" style="margin-top: 5px; background-color: #007bff;">Ajouter un jour férié</button>
-    </div>
-    <ul id="holidayList" style="list-style-type: none; padding: 0;"></ul>
 </div>
 
-<div id="register" class="tab-content-card hidden">
-    <h2>✍️ Saisie de Présence & Absences (Unifiée)</h2>
-    
-    <div class="quick-register-card">
-        <h3>⚡ Enregistrement Instantané (Punch In / Punch Out)</h3>
-        
-        <div class="custom-select-container" id="quickSelectContainer">
-            <button id="customQuickSelectButton" class="custom-select-button" onclick="toggleWorkerDropdown('quick')">
-                <span id="selectedWorkerCount">-- Sélectionner 0 Employé(s) --</span>
-                <i class="fas fa-caret-down"></i>
-            </button>
-            <div id="customQuickWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('quick')">
-                </div>
-        </div>
-        <select id="registerQuickWorkerSelect" multiple size="4">
-            <option value="" disabled>-- Sélectionnez votre nom --</option>
-        </select>
-        
-        <textarea id="taskNoteQuick" placeholder="Tâche(s) accomplie(s) / Note (Optionnel)"></textarea>
-        <div class="input-group" style="justify-content: space-between; gap: 10px;">
-            <button onclick="quickPunch('in')" style="flex: 1;"><i class="fas fa-arrow-circle-right"></i> ENTRÉE</button>
-            <button onclick="quickPunch('out')" style="flex: 1;"><i class="fas fa-arrow-circle-left"></i> SORTIE</button>
-        </div>
-        <p style="font-size: 0.9em; color: #777; margin-top: 15px;">L'heure actuelle est enregistrée automatiquement.</p>
-    </div>
-    <div style="margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px;">
-        <h3>Résumé des entrées instantanées d'aujourd'hui:</h3>
-        <ul id="quickSummaryList" style="list-style-type: none; padding: 0;"></ul>
-    </div>
+<script src="script.js"></script>
+
+</body>
+</html>
     <hr style="margin-top: 30px; margin-bottom: 30px;">
     <div class="manual-register-section">
         <h3>🕰️ Saisie Manuelle ou Rétroactive</h3>

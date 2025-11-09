@@ -1,154 +1,396 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="fr" dir="ltr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>نظام إدارة الحضور والغياب</title>
-
-<link rel="stylesheet" href="style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système de Gestion de Présence Avancé - V3.4 (Tri Unifié)</title>
+    
+    <link rel="stylesheet" href="style.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-<div id="toast-notification"></div>
 
-<header>
-    نظام إدارة الحضور والغياب
-    <button onclick="toggleDarkMode()" 
-            style="position: absolute; left: 15px; top: 10px; 
-                   background: none; border: 1px solid white; 
-                   color: white; padding: 5px 10px; font-size: 1em; 
-                   box-shadow: none !important; transform: none !important;">
-        <i class="fas fa-moon"></i>
-    </button>
-</header>
-<main id="main">
+    <header>
+        Système de Gestion de Présence Avancé
+        <div class="version-label">V3.4 (Tri Unifié)</div>
+    </header>
 
-<div id="employees" class="tab-content-card">
-    <h2>🏠 لوحة القيادة (نظرة عامة)</h2>
-    
-    <div class="dashboard-section">
-        <h3>📊 ملخص اليوم <small id="currentDateDisplay" style="color: #6c757d; font-size: 0.9em; font-weight: normal;"></small></h3>
-        <div class="dashboard-summary-container">
-            <div class="kpi-card-dashboard green">
-                <h4>موظفون حاضرون (Punch In نشط)</h4>
-                <span id="kpiPresentNow" class="kpi-value-dashboard">0</span>
-            </div>
-            <div class="kpi-card-dashboard red">
-                <h4>غيابات مؤكدة</h4>
-                <span id="kpiAbsencesToday" class="kpi-value-dashboard">0</span>
-            </div>
-            <div class="kpi-card-dashboard yellow">
-                <h4>إجمالي الموظفين المسجلين</h4>
-                <span id="kpiTotalWorkers" class="kpi-value-dashboard">0</span>
-            </div>
-        </div>
-    </div>
-    
-    <div class="dashboard-section">
-        <h3>🏃 من هو حاضر الآن؟</h3>
-        <ul id="presenceNowList"></ul>
-    </div>
-    
-    <div class="dashboard-section" style="margin-top: 30px;">
-        <h3>⚠️ إجراءات مُعلّقة (سجلات غير مغلقة)</h3>
-        <p style="color: #dc3545;">*سجل **دخول** لأيام سابقة بدون **خروج**.</p>
-        <ul id="pendingActionsList"></ul>
-    </div>
-    
-    <hr style="margin-top: 30px; margin-bottom: 30px;">
-    
-    <h2>📋 إدارة الموظفين والأعياد</h2>
-    <p style="border-bottom: 1px dashed #ccc; padding-bottom: 10px;">**قائمة وإدارة الموظفين:**</p>
-    <div class="input-group" style="display: block;">
-        <input type="text" id="workerName" placeholder="الاسم الكامل للموظف">
-        <input type="text" id="workerDepartment" placeholder="القسم / الفرع">
-        <div class="input-group" style="margin-top: 5px;">
-             <div><label for="defaultEntry">دخول افتراضي:</label><input type="time" id="defaultEntry" value="09:00"></div>
-            <div><label for="defaultExit">خروج افتراضي:</label><input type="time" id="defaultExit" value="17:00"></div>
-        </div>
-        <button onclick="addWorker()" style="margin-top: 5px; background-color: var(--primary-color);">إضافة موظف</button>
-    </div>
-    <ul id="workerList" style="list-style-type: none; padding: 0;"></ul>
-    <p style="border-bottom: 1px dashed #ccc; padding: 15px 0 10px 0; margin-top: 20px;">**إدارة الأيام والمناسبات:**</p>
-    <div class="input-group" style="display: block;">
-        <input type="date" id="holidayDate" style="margin-bottom: 5px;">
-        <input type="text" id="holidayName" placeholder="اسم المناسبة (مثال: عيد الفطر)">
-        <button onclick="addHoliday()" style="margin-top: 5px; background-color: #555;">إضافة مناسبة / يوم عطلة</button>
-    </div>
-    <ul id="holidayList" style="list-style-type: none; padding: 0;"></ul>
-</div>
-
-<div id="register" class="tab-content-card hidden">
-    <h2>✍️ تسجيل الحضور والغياب</h2>
-    
-    <div class="quick-register-card">
-        <h3>⚡ تسجيل فوري (Punch In / Punch Out)</h3>
+    <main>
         
-        <div class="custom-select-container" id="quickSelectContainer">
-            <button id="customQuickSelectButton" class="custom-select-button" onclick="toggleWorkerDropdown('quick')">
-                <span id="selectedWorkerCount">-- اختر 0 موظف(ين) --</span>
-                <i class="fas fa-caret-down"></i>
-            </button>
-            <div id="customQuickWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('quick')"></div>
-        </div>
-        
-        <textarea id="taskNoteQuick" placeholder="المهمة(المهام) المنجزة / ملاحظة (اختياري)"></textarea>
-        <div class="input-group" style="justify-content: space-between; gap: 10px;">
-            <button onclick="quickPunch('in')" style="flex: 1; background-color: var(--success-color);"><i class="fas fa-arrow-circle-right"></i> دخول</button>
-            <button onclick="quickPunch('out')" style="flex: 1; background-color: var(--danger-color);"><i class="fas fa-arrow-circle-left"></i> خروج</button>
-        </div>
-        <p style="font-size: 0.9em; color: #777; margin-top: 15px;">يتم تسجيل الوقت الحالي تلقائياً.</p>
-    </div>
-    <div style="margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px;">
-        <h3>ملخص الإدخالات الفورية لليوم:</h3>
-        <ul id="quickSummaryList" style="list-style-type: none; padding: 0;"></ul>
-    </div>
-    <hr style="margin-top: 30px; margin-bottom: 30px;">
-    <div class="manual-register-section">
-        <h3>🕰️ تسجيل يدوي أو بأثر رجعي</h3>
-        <div class="input-group">
-            <div><label for="workerSelect">الموظف:</label><select id="workerSelect"><option value="" disabled selected>-- اختر --</option></select></div>
-            <div><label for="dateSelect">التاريخ:</label><input type="date" id="dateSelect"></div>
-        </div>
-        <div class="input-group">
-            <div><label for="entryTime">وقت الدخول:</label><input type="time" id="entryTime"></div>
-            <div><label for="exitTime">وقت الخروج:</label><input type="time" id="exitTime"></div>
-        </div>
-        <div class="input-group">
-            <div><label for="breakStart">بداية الاستراحة (اختياري):</label><input type="time" id="breakStart"></div>
-            <div><label for="breakEnd">نهاية الاستراحة (اختياري):</label><input type="time" id="breakEnd"></div>
-        </div>
-        <textarea id="manualNote" placeholder="ملاحظة خاصة بهذا السجل (اختياري)"></textarea>
-        <button id="registerButton" onclick="registerPresence()">تسجيل الحضور</button>
-        <button onclick="clearForm()" style="background-color: #6c757d; margin-top: 5px;">إلغاء / نموذج جديد</button>
-    </div>
-    <hr style="margin-top: 30px; margin-bottom: 30px;">
-    <div class="absence-section">
-        <h3>❌ إدارة الغيابات والإجازات (مُخطط لها)</h3>
-        <div class="input-group">
-            <div><label for="absenceWorker">الموظف:</label><select id="absenceWorker"><option value="" disabled selected>-- اختر --</option></select></div>
-            <div><label for="absenceReason">السبب:</label><select id="absenceReason">
-                <option value="Maladie">مرضي</option><option value="Permission">إذن</option>
-                <option value="Conge_Annuel">إجازة سنوية</option><option value="Autre">أخرى</option>
-            </select></div>
-        </div>
-        <p style="margin-top: 15px; margin-bottom: 5px;">**فترة الغياب:**</p>
-        <div class="input-group">
-            <div><label for="startDate">تاريخ البداية:</label><input type="date" id="startDate"></div>
-            <div><label for="endDate">تاريخ النهاية (نفس التاريخ ليوم واحد):</label><input type="date" id="endDate"></div>
-        </div>
-        <button onclick="registerPlannedAbsence()" style="background-color: var(--danger-color);">تسجيل / تخطيط الغياب</button>
-        <p style="margin-top: 25px; border-top: 1px dashed #ddd; padding-top: 10px;">**الغيابات المخطط لها:**</p>
-        <ul id="plannedAbsenceList" style="list-style-type: none; padding: 0;"></ul>
-    </div>
-</div>
+        <section id="accueil" class="tab-content active">
+            <h2><i class="fas fa-home"></i> Accueil</h2>
+            <div class="tab-sub-menu">
+                <button onclick="showSubContent('workerManagement')"><i class="fas fa-user-plus"></i> Gestion des Employés</button>
+                <button onclick="showSubContent('holidayManagement')"><i class="fas fa-calendar-alt"></i> Gestion des Jours Fériés</button>
+            </div>
 
-<!-- باقي التبويبات مثل الجدول، التقويم، التقارير، البروفايل، التصدير... نفس الهيكل، يمكن الإضافة لاحقاً -->
+            <div id="workerManagement" class="sub-content active">
+                <h3>Ajouter un Nouvel Employé</h3>
+                <form id="addWorkerForm">
+                    <div class="input-group">
+                        <label for="workerName">Nom de l'Employé:</label>
+                        <input type="text" id="workerName" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="workerDept">Département:</label>
+                        <input type="text" id="workerDept" value="Administration">
+                    </div>
+                    <div class="input-group">
+                        <label for="defaultEntry">Heure d'Entrée par Défaut:</label>
+                        <input type="time" id="defaultEntry" value="08:00">
+                    </div>
+                    <div class="input-group">
+                        <label for="defaultExit">Heure de Sortie par Défaut:</label>
+                        <input type="time" id="defaultExit" value="17:00">
+                    </div>
+                    <button type="submit" class="submit-btn"><i class="fas fa-save"></i> Ajouter l'Employé</button>
+                </form>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="script.js"></script>
+                <h3>Liste des Employés</h3>
+                <div class="worker-list-container" id="workerListContainer">
+                    </div>
+            </div>
 
+            <div id="holidayManagement" class="sub-content">
+                <h3>Ajouter un Jour Férié</h3>
+                <form id="addHolidayForm">
+                    <div class="input-group">
+                        <label for="holidayDate">Date:</label>
+                        <input type="date" id="holidayDate" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="holidayName">Nom du Jour Férié:</label>
+                        <input type="text" id="holidayName" required>
+                    </div>
+                    <button type="submit" class="submit-btn"><i class="fas fa-calendar-plus"></i> Ajouter le Jour Férié</button>
+                </form>
+
+                <h3>Jours Fériés Enregistrés</h3>
+                <div id="holidayListContainer" class="holiday-list-container">
+                    </div>
+            </div>
+        </section>
+
+        <section id="saisie" class="tab-content">
+            <h2><i class="fas fa-clock"></i> Saisie de Présence & Absences</h2>
+            
+            <div class="tab-sub-menu">
+                <button onclick="showSubContent('quickEntry')"><i class="fas fa-stopwatch"></i> Enregistrement Instantané</button>
+                <button onclick="showSubContent('manualEntry')"><i class="fas fa-edit"></i> Saisie Manuelle/Rétroactive</button>
+                <button onclick="showSubContent('absenceEntry')"><i class="fas fa-user-slash"></i> Saisie des Absences (Congés)</button>
+            </div>
+
+            <div id="quickEntry" class="sub-content active">
+                <h3>1. Sélection Rapide des Employés</h3>
+                <div class="quick-select-dropdown-container">
+                    <button onclick="toggleWorkerDropdown('quick')" class="dropdown-toggle-btn">
+                        <i class="fas fa-users"></i> Sélectionner les Employés <span id="quickSelectCount">(0)</span>
+                    </button>
+                    <div id="quickWorkerDropdown" class="worker-dropdown-content">
+                        </div>
+                </div>
+
+                <h3>2. Enregistrement</h3>
+                <div class="entry-type-selector">
+                    <button onclick="processQuickEntry('entry')" class="entry-btn entry-in-btn"><i class="fas fa-sign-in-alt"></i> Entrée (Punch In)</button>
+                    <button onclick="processQuickEntry('exit')" class="entry-btn entry-out-btn"><i class="fas fa-sign-out-alt"></i> Sortie (Punch Out)</button>
+                </div>
+                <div class="current-time-display">
+                    Heure Actuelle: <span id="currentTimeDisplay"></span>
+                </div>
+            </div>
+
+            <div id="manualEntry" class="sub-content">
+                <h3>Saisie ou Modification d'un Enregistrement Complet</h3>
+                <form id="manualEntryForm">
+                    <div class="input-group">
+                        <label for="manualWorker">Employé:</label>
+                        <select id="manualWorker" required>
+                            </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="manualDate">Date:</label>
+                        <input type="date" id="manualDate" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="manualEntryTime">Heure d'Entrée:</label>
+                        <input type="time" id="manualEntryTime" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="manualExitTime">Heure de Sortie:</label>
+                        <input type="time" id="manualExitTime" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="manualBreakStart">Début Pause (Optionnel):</label>
+                        <input type="time" id="manualBreakStart">
+                    </div>
+                    <div class="input-group">
+                        <label for="manualBreakEnd">Fin Pause (Optionnel):</label>
+                        <input type="time" id="manualBreakEnd">
+                    </div>
+                    <button type="submit" class="submit-btn"><i class="fas fa-save"></i> Enregistrer l'Entrée</button>
+                </form>
+            </div>
+
+            <div id="absenceEntry" class="sub-content">
+                <h3>Planification et Saisie des Absences</h3>
+                <form id="absenceForm">
+                    <div class="input-group">
+                        <label for="absenceWorker">Employé Absent:</label>
+                        <select id="absenceWorker" required>
+                            </select>
+                    </div>
+                    <div class="input-group">
+                        <label for="absenceStartDate">Date de Début:</label>
+                        <input type="date" id="absenceStartDate" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="absenceEndDate">Date de Fin:</label>
+                        <input type="date" id="absenceEndDate" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="absenceReason">Raison de l'Absence:</label>
+                        <select id="absenceReason" required>
+                            <option value="Congé Annuel">Congé Annuel</option>
+                            <option value="Maladie">Maladie</option>
+                            <option value="Sans Solde">Sans Solde</option>
+                            <option value="Autre">Autre</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="submit-btn absence-btn"><i class="fas fa-calendar-times"></i> Enregistrer l'Absence</button>
+                </form>
+            </div>
+        </section>
+
+        <section id="tableau" class="tab-content">
+            <h2><i class="fas fa-table"></i> Tableau des Enregistrements</h2>
+
+            <div class="table-controls">
+                <div class="table-select-dropdown-container">
+                    <button onclick="toggleWorkerDropdown('table')" class="dropdown-toggle-btn">
+                        <i class="fas fa-users-cog"></i> Filtrer par Employé(s) <span id="tableSelectCount">(Tous)</span>
+                    </button>
+                    <div id="tableWorkerDropdown" class="worker-dropdown-content">
+                        <label><input type="checkbox" id="selectAllTable" onclick="toggleSelectAll('table')"> <i class="fas fa-check-double"></i> Sélectionner Tout</label>
+                        <div id="tableWorkerList">
+                            </div>
+                    </div>
+                </div>
+
+                <div class="period-filter-dropdown-container">
+                    <button onclick="togglePeriodDropdown()" class="dropdown-toggle-btn">
+                        <i class="fas fa-calendar-day"></i> Période: <span id="periodFilterLabel">Ce Mois</span>
+                    </button>
+                    <div id="periodFilterDropdown" class="filter-dropdown-content">
+                        <button onclick="setFilterPeriod('today')"><i class="fas fa-sun"></i> Aujourd'hui</button>
+                        <button onclick="setFilterPeriod('week')"><i class="fas fa-calendar-week"></i> Cette Semaine</button>
+                        <button onclick="setFilterPeriod('month')"><i class="fas fa-calendar-alt"></i> Ce Mois</button>
+                        <button onclick="setFilterPeriod('all')"><i class="fas fa-infinity"></i> Toute Période</button>
+                    </div>
+                </div>
+
+                <div class="sort-filter-dropdown-container">
+                    <button onclick="toggleSortDropdown()" class="dropdown-toggle-btn">
+                        <i class="fas fa-sort"></i> Trier par: <span id="sortFilterLabel">Date (Desc)</span>
+                    </button>
+                    <div id="sortFilterDropdown" class="filter-dropdown-content">
+                        <button onclick="setSortType('date_desc')"><i class="fas fa-calendar-alt"></i> Date (Décroissant)</button>
+                        <button onclick="setSortType('date_asc')"><i class="fas fa-calendar-alt"></i> Date (Croissant)</button>
+                        <button onclick="setSortType('net_desc')"><i class="fas fa-hourglass-half"></i> Heures Net (Décroissant)</button>
+                        <button onclick="setSortType('net_asc')"><i class="fas fa-hourglass-half"></i> Heures Net (Croissant)</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="presenceTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Date</th>
+                            <th>Employé</th>
+                            <th>Entrée</th>
+                            <th>Sortie</th>
+                            <th>Pause (Min)</th>
+                            <th>Heures Net</th>
+                            <th>Statut</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="presenceTableBody">
+                        </tbody>
+                </table>
+                <div id="tableEmptyMessage" class="empty-message" style="display: none;">
+                    Aucun enregistrement trouvé pour les filtres sélectionnés.
+                </div>
+            </div>
+        </section>
+
+        <section id="calendrier" class="tab-content">
+            <h2><i class="fas fa-calendar-alt"></i> Calendrier d'Absences & Présences</h2>
+            <div class="calendar-controls">
+                <button onclick="changeMonth(-1)"><i class="fas fa-chevron-left"></i> Précédent</button>
+                <h3 id="calendarMonthYear">Mois Année</h3>
+                <button onclick="changeMonth(1)">Suivant <i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-worker-selector">
+                 <label for="calendarWorkerSelect">Filtrer par Employé:</label>
+                 <select id="calendarWorkerSelect" onchange="renderCalendar()">
+                     <option value="all">Tous les Employés</option>
+                     </select>
+            </div>
+            <div id="calendarGrid" class="calendar-grid">
+                </div>
+            <div class="legend-container">
+                <span class="legend-item"><i class="fas fa-circle presence"></i> Présent</span>
+                <span class="legend-item"><i class="fas fa-circle absence"></i> Absent</span>
+                <span class="legend-item"><i class="fas fa-circle holiday"></i> Jour Férié</span>
+                <span class="legend-item"><i class="fas fa-circle pending"></i> En Cours / Punch In</span>
+            </div>
+        </section>
+
+        <section id="rapports" class="tab-content">
+            <h2><i class="fas fa-chart-line"></i> Rapports & Indicateurs Clés (KPI)</h2>
+
+            <div class="kpi-container">
+                <div class="kpi-card">
+                    <i class="fas fa-chart-pie kpi-icon"></i>
+                    <h4>Taux d'Absence Global (Mois)</h4>
+                    <p id="kpiAbsenceRate" class="kpi-value">0.00%</p>
+                </div>
+                <div class="kpi-card">
+                    <i class="fas fa-hourglass-half kpi-icon"></i>
+                    <h4>Heures Net Moyennes/Jour</h4>
+                    <p id="kpiAvgNetHours" class="kpi-value">0.00h</p>
+                </div>
+                <div class="kpi-card">
+                    <i class="fas fa-calculator kpi-icon"></i>
+                    <h4>Total Heures Net (Mois)</h4>
+                    <p id="kpiTotalNetHours" class="kpi-value">0.00h</p>
+                </div>
+            </div>
+
+            <h3>Performance Mensuelle par Employé</h3>
+            <div class="table-container">
+                <table id="monthlyPerformanceTable">
+                    <thead>
+                        <tr>
+                            <th>Employé</th>
+                            <th>Total Net (h)</th>
+                            <th>Jours de Présence</th>
+                            <th>Jours d'Absence</th>
+                            <th>Taux de Présence</th>
+                        </tr>
+                    </thead>
+                    <tbody id="monthlyPerformanceTableBody">
+                        </tbody>
+                </table>
+            </div>
+
+            <h3>Graphique des Heures de Travail (Mois)</h3>
+            <div class="chart-container">
+                <canvas id="monthlyHoursChart"></canvas>
+            </div>
+        </section>
+
+        <section id="profil" class="tab-content">
+            <h2><i class="fas fa-user-cog"></i> Profil & Paramètres Employé</h2>
+
+            <div class="profile-worker-selector">
+                <label for="profileWorkerSelect">Sélectionner Employé:</label>
+                <select id="profileWorkerSelect" onchange="displayProfileData()">
+                    </select>
+            </div>
+
+            <div id="profileDetails" style="display: none;">
+                <h3><i class="fas fa-id-card"></i> Détails du Profil</h3>
+                <form id="updateWorkerForm">
+                    <input type="hidden" id="profileWorkerId">
+                    <div class="input-group">
+                        <label for="profileWorkerName">Nom:</label>
+                        <input type="text" id="profileWorkerName" required disabled>
+                    </div>
+                    <div class="input-group">
+                        <label for="profileWorkerDept">Département:</label>
+                        <input type="text" id="profileWorkerDept">
+                    </div>
+                    <div class="input-group">
+                        <label for="profileDefaultEntry">Heure d'Entrée par Défaut:</label>
+                        <input type="time" id="profileDefaultEntry">
+                    </div>
+                    <div class="input-group">
+                        <label for="profileDefaultExit">Heure de Sortie par Défaut:</label>
+                        <input type="time" id="profileDefaultExit">
+                    </div>
+                    <button type="submit" class="submit-btn"><i class="fas fa-sync-alt"></i> Mettre à Jour Profil</button>
+                    <button type="button" class="delete-btn" onclick="confirmDeleteWorker()"><i class="fas fa-trash-alt"></i> Supprimer Employé</button>
+                </form>
+
+                <hr>
+
+                <h3><i class="fas fa-chart-bar"></i> Performance Individuelle (Mois)</h3>
+                <div class="profile-kpi-container">
+                    <div class="kpi-card mini">
+                        <h4>Total Net (h)</h4>
+                        <p id="profileTotalNetHours" class="kpi-value">0.00</p>
+                    </div>
+                    <div class="kpi-card mini">
+                        <h4>Jours de Présence</h4>
+                        <p id="profilePresenceDays" class="kpi-value">0</p>
+                    </div>
+                    <div class="kpi-card mini">
+                        <h4>Jours d'Absence</h4>
+                        <p id="profileAbsenceDays" class="kpi-value">0</p>
+                    </div>
+                    <div class="kpi-card mini">
+                        <h4>Jours de Retard</h4>
+                        <p id="profileLatenessDays" class="kpi-value">0</p>
+                    </div>
+                </div>
+
+                <div class="chart-container profile-chart-container">
+                    <canvas id="profileAttendanceDoughnut"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="exportation" class="tab-content">
+            <h2><i class="fas fa-file-export"></i> Exportation & Sauvegarde</h2>
+
+            <h3>Exportation des Données</h3>
+            <p>Exportez toutes les données de présence enregistrées vers un fichier Excel (xlsx).</p>
+            <button onclick="exportToExcel()" class="export-btn"><i class="fas fa-file-excel"></i> Exporter en Excel (.xlsx)</button>
+
+            <h3>Sauvegarde & Restauration (JSON)</h3>
+            <p>Sauvegardez ou restaurez toutes les données de l'application via des fichiers JSON de sauvegarde locale.</p>
+
+            <div class="data-management-group">
+                <button onclick="exportData()" class="backup-btn"><i class="fas fa-download"></i> Sauvegarder les Données (Backup)</button>
+                
+                <div class="restore-group">
+                    <label for="restoreFile" class="restore-label"><i class="fas fa-upload"></i> Restaurer depuis JSON:</label>
+                    <input type="file" id="restoreFile" accept=".json" onchange="restoreData(event)" class="file-input">
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="dayDetailsModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <h3 id="modalDateTitle">Détails pour le [Date]</h3>
+            <div id="modalDetailsBody">
+                </div>
+        </div>
+    </div>
+    
+    <div id="toastContainer"></div>
+    <div id="popupContainer"></div>
+
+    <script src="script.js" defer></script>
 </body>
 </html>

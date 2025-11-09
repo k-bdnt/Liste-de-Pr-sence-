@@ -1,210 +1,240 @@
-/* ==================== 1. نظام الألوان والمتغيرات ==================== */
+/* ======================================================= */
+/* === STYLE.CSS - أنماط واجهة نظام إدارة الحضور === */
+/* ======================================================= */
+
+/* ==================== 0. المتغيرات ==================== */
 :root {
-    /* ☀️ Thème Clair (Rouge) */
-    --primary-color: #DC3545;   /* Rouge principal */
-    --secondary-color: #6C757D;
-    --success-color: #28A745;
-    --danger-color: #DC3545;
-    --card-bg: #FFFFFF; 
-    --background-color: #f4f7f6; 
-    --text-color: #333333; 
-    --border-color: #DDDDDD; 
+    --primary-color: #007bff;
+    --success-color: #28a745;
+    --danger-color: #dc3545;
+    --warning-color: #ffc107;
+    --secondary-color: #6c757d;
+    --background-color: #f9f9f9;
+    --text-color: #333;
+    --header-bg: #007bff;
 }
 
-/* 🌙 Thème Sombre (Rouge) */
-[data-theme='dark'] {
-    --primary-color: #FF5252; /* Rouge plus clair pour le contraste */
-    --secondary-color: #A9B3BB;
-    --success-color: #69F0AE;
-    --danger-color: #FF5252;
-    --card-bg: #1E2730; 
-    --background-color: #12181F; 
-    --text-color: #E0E0E0; 
-    --border-color: #3A4753; 
+/* الوضع الداكن */
+body[data-theme="dark"] {
+    --background-color: #121212;
+    --text-color: #e0e0e0;
+    --header-bg: #1f1f1f;
+    --primary-color: #1e90ff;
+    --success-color: #28a745;
+    --danger-color: #ff4d4d;
+    --warning-color: #ffc107;
+    --secondary-color: #b0b0b0;
 }
 
-/* ==================== 2. Réinitialisation et Style Général ==================== */
-
+/* ==================== 1. الأساسيات ==================== */
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    direction: rtl; /* Garder RTL pour l'instant, mais la langue sera française */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    /* Application des variables */
     background-color: var(--background-color);
     color: var(--text-color);
-    padding-bottom: 70px;
-    font-family: 'Arial', sans-serif;
-    transition: background-color 0.3s, color 0.3s; 
+    line-height: 1.5;
 }
 
 header {
-    background-color: var(--primary-color);
+    background-color: var(--header-bg);
     color: white;
-    padding: 15px 20px;
-    text-align: center;
     font-size: 1.5em;
-    font-weight: bold;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative; 
-}
-
-main {
     padding: 15px;
+    position: relative;
+    text-align: center;
 }
 
-.hidden {
-    display: none !important;
-}
-
-/* ==================== 3. Onglets et Cartes ==================== */
-.tab-content-card {
-    background-color: var(--card-bg);
-    padding: 25px; 
-    border-radius: 15px; 
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
-    margin-top: 20px;
-    transition: background-color 0.3s;
-}
-
-/* ==================== 4. Barre de Navigation Inférieure ==================== */
+/* ==================== 2. تنقل التبويبات ==================== */
 .tab-navigation {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
     display: flex;
     justify-content: space-around;
-    background-color: var(--card-bg);
-    border-top: 1px solid var(--border-color);
-    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
-    height: 65px;
-    z-index: 1000;
+    background-color: var(--header-bg);
+    flex-wrap: wrap;
 }
 
-.tab-button {
-    flex-grow: 1;
-    background: none;
-    border: none;
-    color: var(--secondary-color);
-    padding: 8px 5px;
-    font-size: 0.85em; 
-    cursor: pointer;
-    transition: color 0.3s, background-color 0.3s;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.tab-button i {
-    font-size: 1.3em;
-    margin-bottom: 3px;
-}
-
-.tab-button.active {
-    color: var(--primary-color);
-    border-bottom: 3px solid var(--primary-color);
-    background-color: color-mix(in srgb, var(--primary-color) 8%, var(--card-bg)); 
-}
-
-/* ==================== 5. Boutons et Entrées ==================== */
-input[type="text"], input[type="date"], input[type="time"], select, textarea {
-    width: 100%;
+.tab-navigation .tab-button {
+    flex: 1;
     padding: 10px;
-    margin-bottom: 10px;
-    border: 1px solid var(--border-color);
-    border-radius: 6px;
-    font-size: 1em;
-    background-color: var(--card-bg);
-    color: var(--text-color); 
-    transition: border-color 0.3s;
+    color: white;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-input:focus, select:focus, textarea:focus {
-    border-color: var(--primary-color);
-    outline: none;
+.tab-navigation .tab-button.active,
+.tab-navigation .tab-button:hover {
+    background-color: rgba(255,255,255,0.2);
+    font-weight: bold;
+}
+
+/* ==================== 3. محتوى التبويبات ==================== */
+.tab-content-card {
+    padding: 20px;
+}
+
+.tab-content-card.hidden {
+    display: none;
+}
+
+input, select, textarea, button {
+    padding: 8px;
+    margin: 2px 0;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+input[type="time"],
+input[type="date"],
+select {
+    width: 150px;
+}
+
+textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 50px;
 }
 
 button {
-    color: white;
-    padding: 10px 15px;
-    border: none;
-    border-radius: 8px; 
     cursor: pointer;
-    font-size: 1em;
-    font-weight: bold; 
-    transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-    background-color: #555; 
+    border: none;
+    color: white;
+    transition: 0.3s;
 }
 
 button:hover {
-    opacity: 0.95;
-    transform: translateY(-2px); 
-    box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); 
+    opacity: 0.85;
 }
 
-/* Couleurs des boutons principaux */
-button[onclick*="addWorker"], button[onclick*="registerPresence"] {
-    background-color: var(--primary-color);
+/* ==================== 4. بطاقات الملخص / KPI ==================== */
+.kpi-card-dashboard, .kpi-card, .profile-kpi-card {
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    display: inline-block;
+    min-width: 180px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+    color: white;
 }
 
-.quick-register-card button[onclick*="in"] {
-    background-color: var(--success-color);
-}
-.quick-register-card button[onclick*="out"] {
-    background-color: var(--danger-color);
+.kpi-card-dashboard.green { background-color: var(--success-color); }
+.kpi-card-dashboard.red { background-color: var(--danger-color); }
+.kpi-card-dashboard.yellow { background-color: var(--warning-color); }
+
+.kpi-value-dashboard, .kpi-value, .profile-value {
+    font-size: 1.5em;
+    font-weight: bold;
 }
 
-
-/* ==================== 6. Styles du Tableau ==================== */
+/* ==================== 5. الجداول ==================== */
 .table-container {
     overflow-x: auto;
-    margin-top: 20px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
 }
 
-#presenceTable th, #monthlyReportTable th {
-    background-color: var(--border-color); 
-    color: var(--text-color);
-    padding: 12px 8px;
-    text-align: right;
-    border-bottom: 2px solid var(--primary-color);
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
 }
 
-#presenceTable td, #monthlyReportTable td {
-    padding: 10px 8px;
-    border-bottom: 1px solid var(--border-color);
-    text-align: right;
+table th, table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
 }
 
-/* Lignes alternées (Zebra Striping) */
-#presenceTable tbody tr:nth-child(odd) {
-    background-color: var(--background-color); 
-}
-
-#presenceTable tbody tr:hover {
-    background-color: color-mix(in srgb, var(--primary-color) 15%, var(--card-bg)); 
-    cursor: pointer;
-}
-
-/* ==================== 7. Styles divers ==================== */
-.worker-item {
-    background-color: color-mix(in srgb, var(--card-bg), var(--background-color) 5%);
-    border-bottom: 1px dashed var(--border-color);
-}
-
-#toast-notification {
+table th {
     background-color: var(--primary-color);
     color: white;
 }
-#toast-notification.error {
-    background-color: var(--danger-color);
+
+/* ==================== 6. القوائم ==================== */
+ul {
+    list-style: none;
+    padding-left: 0;
 }
-#toast-notification.success {
-    background-color: var(--success-color);
+
+.worker-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 10px;
+    border-bottom: 1px solid #ccc;
+}
+
+/* ==================== 7. الإشعارات ==================== */
+#toast-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    border-radius: 6px;
+    color: white;
+    display: none;
+    z-index: 1000;
+}
+
+#toast-notification.show {
+    display: block;
+}
+
+#toast-notification.info { background-color: var(--primary-color); }
+#toast-notification.success { background-color: var(--success-color); }
+#toast-notification.error { background-color: var(--danger-color); }
+
+/* ==================== 8. التقويم ==================== */
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 2px;
+}
+
+.calendar div {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: center;
+}
+
+.calendar div.today {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+/* ==================== 9. المودال ==================== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6);
+}
+
+.modal-content {
+    background-color: var(--background-color);
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.close-button {
+    position: absolute;
+    top: 10px; right: 15px;
+    font-size: 1.5em;
+    cursor: pointer;
+}
+
+/* ==================== 10. الأزرار الصغيرة ==================== */
+.input-group button {
+    min-width: 100px;
+    margin-top: 5px;
 }

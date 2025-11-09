@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Système de Gestion de Présence Avancé - V3.4 (Tri Unifié)</title>
+<title>Système de Gestion de Présence Avancé - V3.5 (Dashboard Live)</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 <style>
 /* --- 1. Global & Bold Minimalism Base Styles (Updated Colors) --- */
@@ -427,6 +427,87 @@ button[onclick*="saveWorkerProfile()"] { background-color: #4CAF50; }
 .calendar.month-view .day.present { background-color: #e8f5e9; border: 1px solid #4CAF50; cursor: pointer; } 
 .calendar.month-view .day.absent { background-color: #ffebee; border: 1px solid #dc3545; cursor: pointer; } 
 .calendar.month-view .day.holiday { background-color: #fff8e1; border: 1px solid #FFC107; cursor: pointer; } 
+
+/* --- DASHBOARD STYLES --- */
+.dashboard-summary-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e0e0e0;
+}
+.kpi-card-dashboard {
+    background-color: #f7f7f7;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+.kpi-card-dashboard h4 {
+    margin-top: 0;
+    font-size: 1rem;
+    color: #6c757d;
+}
+.kpi-card-dashboard .kpi-value-dashboard {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: #D62828;
+    display: block;
+}
+.kpi-card-dashboard.green .kpi-value-dashboard { color: #4CAF50; }
+.kpi-card-dashboard.red .kpi-value-dashboard { color: #dc3545; }
+.kpi-card-dashboard.yellow .kpi-value-dashboard { color: #FFC107; }
+
+/* Qui est présent? */
+#presenceNowList {
+    list-style-type: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+#presenceNowList li {
+    background-color: #e8f5e9;
+    color: #1b5e20;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.95rem;
+    border: 1px solid #4CAF50;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#presenceNowList li i { margin-right: 5px; color: #4CAF50; }
+
+/* Actions en attente */
+#pendingActionsList {
+    list-style-type: none;
+    padding: 0;
+    margin-top: 15px;
+}
+#pendingActionsList li {
+    background-color: #ffebee;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+    border-left: 5px solid #dc3545;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+#pendingActionsList li button {
+    width: auto;
+    padding: 5px 10px;
+    margin: 0;
+    font-size: 0.8rem;
+    background-color: #dc3545;
+}
+/* FIN DASHBOARD STYLES */
 </style>
 </head>
 <body>
@@ -438,7 +519,42 @@ button[onclick*="saveWorkerProfile()"] { background-color: #4CAF50; }
 <main id="main">
 
 <div id="employees" class="tab-content-card">
-    <h2>📋 Gestion des Employés & Jours Fériés (Accueil)</h2>
+    <h2>🏠 Tableau de Bord (Aperçu du Jour)</h2>
+    
+    <div class="dashboard-section">
+        <h3>📊 Résumé du Jour <small id="currentDateDisplay" style="color: #6c757d; font-size: 0.9em; font-weight: normal;"></small></h3>
+        <div class="dashboard-summary-container">
+            <div class="kpi-card-dashboard green">
+                <h4>Employés Présents (Punch In Actif)</h4>
+                <span id="kpiPresentNow" class="kpi-value-dashboard">0</span>
+            </div>
+            <div class="kpi-card-dashboard red">
+                <h4>Absences Confirmées</h4>
+                <span id="kpiAbsencesToday" class="kpi-value-dashboard">0</span>
+            </div>
+            <div class="kpi-card-dashboard yellow">
+                <h4>Total Employés Enregistrés</h4>
+                <span id="kpiTotalWorkers" class="kpi-value-dashboard">0</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="dashboard-section">
+        <h3>🏃 Qui est présent maintenant? (Punch In Actif)</h3>
+        <ul id="presenceNowList">
+            </ul>
+    </div>
+    
+    <div class="dashboard-section" style="margin-top: 30px;">
+        <h3>⚠️ Actions En Attente (Saisies Non Clôturées)</h3>
+        <p style="color: #dc3545;">*Saisie **Entrée** des jours précédents sans **Sortie** enregistrée.</p>
+        <ul id="pendingActionsList">
+            </ul>
+    </div>
+    
+    <hr style="margin-top: 30px; margin-bottom: 30px;">
+    
+    <h2>📋 Gestion des Employés & Jours Fériés</h2>
     <p style="border-bottom: 1px dashed #ccc; padding-bottom: 10px;">**Liste et gestion des employés:**</p>
     <div class="input-group" style="display: block;">
         <input type="text" id="workerName" placeholder="Nom complet de l'employé">
@@ -910,9 +1026,127 @@ function openTab(evt, tabName) {
     if(tabName === 'reports') { loadWorkersIntoSelects(); calculateKPIs(); drawChart(); } 
     if(tabName === 'table') { loadWorkersIntoSelects(); loadPresence(); updatePeriodFilterButtonLabel(); updateSortButtonLabel(); } 
     if(tabName === 'calendar') { loadWorkersIntoSelects(); drawCalendar(currentYear, currentMonth); } 
-    if(tabName === 'employees') { loadWorkers(); loadHoliday(); }
+    if(tabName === 'employees') { loadWorkers(); loadHoliday(); loadDashboardSummary(); loadPendingActions(); } // NOUVEAU: Appel des fonctions du Dashboard
     if(tabName === 'register') { loadWorkersIntoSelects(); loadQuickSummary(); loadPlannedAbsence(); } 
     if(tabName === 'profile') { loadWorkersIntoSelects(); loadWorkerProfile(); } 
+}
+
+// ------------------------------------
+// NOUVEAU: Dashboard Logic 
+// ------------------------------------
+function loadDashboardSummary() {
+    const workers = getWorkersList();
+    const presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    const totalWorkers = workers.length;
+    
+    document.getElementById('currentDateDisplay').textContent = `(Aujourd'hui: ${today})`;
+    document.getElementById('kpiTotalWorkers').textContent = totalWorkers;
+
+    if (totalWorkers === 0) {
+        document.getElementById('kpiPresentNow').textContent = 0;
+        document.getElementById('kpiAbsencesToday').textContent = 0;
+        document.getElementById('presenceNowList').innerHTML = '<li style="background-color: #f7f7f7; color: #777; border: 1px dashed #ccc;">Aucun employé enregistré.</li>';
+        return;
+    }
+
+    const todayEntries = presence.filter(p => p.date === today);
+    const presentWorkers = new Set();
+    const absentWorkers = new Set();
+    
+    // Identifier les présents actifs et les absents confirmés
+    todayEntries.forEach(p => {
+        if (p.absence) {
+            absentWorkers.add(p.name);
+        } else if (p.entry && !p.exit) {
+            presentWorkers.add(p.name);
+        }
+    });
+
+    // Liste des présents actifs
+    const presenceNowList = document.getElementById('presenceNowList');
+    presenceNowList.innerHTML = '';
+    
+    if (presentWorkers.size === 0) {
+        presenceNowList.innerHTML = '<li style="background-color: #f0f0f0; color: #777; border: 1px dashed #ccc;">Personne n\'a "Punch In" pour l\'instant.</li>';
+    } else {
+        presentWorkers.forEach(name => {
+            const li = document.createElement('li');
+            li.innerHTML = `<i class="fas fa-check-circle"></i> ${name}`;
+            presenceNowList.appendChild(li);
+        });
+    }
+
+    // Calcul des KPI pour le résumé
+    const totalAbsent = Array.from(absentWorkers).filter(name => !presentWorkers.has(name)).length;
+    
+    document.getElementById('kpiPresentNow').textContent = presentWorkers.size;
+    document.getElementById('kpiAbsencesToday').textContent = totalAbsent;
+}
+
+function loadPendingActions() {
+    const presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+    const pendingActionsList = document.getElementById('pendingActionsList');
+    pendingActionsList.innerHTML = '';
+    
+    const pendingEntries = presence.filter(p => 
+        p.date !== today && // Seulement les jours précédents
+        p.entry && // Doit avoir une entrée
+        !p.exit && // Ne doit pas avoir de sortie
+        !p.absence // Ne doit pas être une absence confirmée
+    ).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (pendingEntries.length === 0) {
+        pendingActionsList.innerHTML = '<li style="background-color: #f7f7f7; color: #777; border: 1px dashed #ccc;">Aucune action en attente. Toutes les saisies précédentes sont clôturées.</li>';
+        return;
+    }
+
+    pendingEntries.forEach(p => {
+        const originalPresenceList = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+        const originalIndex = originalPresenceList.findIndex((item) => 
+            item.date === p.date && item.name === p.name && item.entry === p.entry && !item.exit
+        );
+        
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <span>
+                <i class="fas fa-exclamation-triangle"></i> 
+                **${p.name}** : Entrée à ${p.entry} le **${p.date}**. Sortie manquante!
+            </span>
+            <button onclick="resolvePendingAction(${originalIndex})" style="background-color: #007bff;"><i class="fas fa-pencil-alt"></i> Résoudre</button>
+        `;
+        pendingActionsList.appendChild(li);
+    });
+}
+
+function resolvePendingAction(originalIndex) {
+     if (originalIndex === null || originalIndex < 0) return showToast('Erreur: Index invalide.', 3000);
+
+     // Récupérer les données de la ligne concernée
+     let presence = JSON.parse(localStorage.getItem(presenceKey) || '[]');
+     const entry = presence[originalIndex];
+
+     if (!entry) return showToast('Erreur: Entrée introuvable.', 3000);
+     
+     // Remplir le formulaire de saisie manuelle avec les données et le mode édition
+     document.getElementById('workerSelect').value = entry.name;
+     document.getElementById('dateSelect').value = entry.date;
+     document.getElementById('entryTime').value = entry.entry;
+     document.getElementById('exitTime').value = entry.exit || getWorkersList().find(w => w.name === entry.name)?.defaultExit || '17:00'; // Proposer l'heure de sortie par défaut
+     document.getElementById('breakStart').value = entry.breakStart || '';
+     document.getElementById('breakEnd').value = entry.breakEnd || '';
+     document.getElementById('manualNote').value = entry.note || '';
+
+     editingIndex = originalIndex; 
+     document.getElementById('registerButton').textContent = 'Mettre à Jour la Saisie (Corriger Sortie)';
+     document.getElementById('registerButton').style.backgroundColor = '#007bff';
+     
+     showToast(`Correction de la saisie de ${entry.name} du ${entry.date}.`, 4000);
+     
+     // Basculer vers l'onglet de Saisie
+     const registerTabButton = document.querySelector('.tab-navigation button[onclick*="openTab(event, \'register\')"]');
+     if (registerTabButton) registerTabButton.click(); 
+
+     window.scrollTo(0, 0); // Faire défiler vers le haut pour voir le formulaire
 }
 
 // ------------------------------------
@@ -940,6 +1174,7 @@ function addWorker() {
     document.getElementById('workerDepartment').value = '';
     loadWorkers();
     loadWorkersIntoSelects();
+    loadDashboardSummary(); // Mettre à jour le tableau de bord
 }
 
 function loadWorkers(){
@@ -973,6 +1208,7 @@ function deleteWorker(name) {
         loadWorkers();
         loadWorkersIntoSelects();
         loadPresence(); 
+        loadDashboardSummary(); // Mettre à jour le tableau de bord
     }
 }
 
@@ -988,6 +1224,7 @@ function addHoliday() {
     showToast(`Jour férié '${name}' ajouté.`, 3000);
     loadHoliday();
     drawCalendar(currentYear, currentMonth); 
+    loadDashboardSummary(); // Mettre à jour le tableau de bord
 }
 
 function loadHoliday() {
@@ -1009,6 +1246,7 @@ function deleteHoliday(date) {
         showToast(`Jour férié du ${date} supprimé.`, 3000);
         loadHoliday();
         drawCalendar(currentYear, currentMonth); 
+        loadDashboardSummary(); // Mettre à jour لوحة التحكم
      }
 }
 
@@ -1460,6 +1698,7 @@ function quickPunch(type) {
     loadQuickSummary();
     loadPresence(); 
     drawCalendar(currentYear, currentMonth); 
+    loadDashboardSummary(); // Mettre à jour لوحة التحكم
 }
 
 function loadQuickSummary() {
@@ -1535,6 +1774,8 @@ function registerPresence() {
     clearForm();
     loadPresence();
     drawCalendar(currentYear, currentMonth);
+    loadDashboardSummary(); // Mettre à jour لوحة التحكم
+    loadPendingActions(); // قد يغير هذا الإجراء قائمة الإجراءات المعلقة
 }
 
 
@@ -1628,6 +1869,7 @@ function registerPlannedAbsence() {
     showToast(`Absence planifiée pour ${name} (${startDate} à ${endDate}) enregistrée.`, 3000);
     loadPlannedAbsence();
     drawCalendar(currentYear, currentMonth);
+    loadDashboardSummary(); // Mettre à jour لوحة التحكم
 }
 
 function loadPlannedAbsence() {
@@ -1670,6 +1912,7 @@ function deletePlannedAbsence(index) {
         loadPlannedAbsence();
         loadPresence();
         drawCalendar(currentYear, currentMonth);
+        loadDashboardSummary(); // Mettre à jour لوحة التحكم
     }
 }
 
@@ -1818,6 +2061,8 @@ function deleteEntry(originalIndex) {
             showToast('Entrée supprimée.', 3000);
             loadPresence(); 
             drawCalendar(currentYear, currentMonth); 
+            loadDashboardSummary(); // Mettre à jour لوحة التحكم
+            loadPendingActions(); // قد يؤثر الحذف على الإجراءات المعلقة
         } else {
              showToast('Erreur: Index de suppression invalide.', 3000);
         }
@@ -2276,6 +2521,7 @@ function saveWorkerProfile() {
     loadWorkersIntoSelects();
     document.getElementById('profileWorkerSelect').value = newName;
     loadWorkerProfile(); 
+    loadDashboardSummary(); // Mettre à jour لوحة التحكم
 }
 
 
@@ -2387,6 +2633,8 @@ window.onload=function(){
   loadHoliday(); 
   loadWorkersIntoSelects(); 
   loadPlannedAbsence(); 
+  loadDashboardSummary(); // تحميل ملخص لوحة التحكم عند بدء التشغيل
+  loadPendingActions();   // تحميل الإجراءات المعلقة عند بدء التشغيل
   
   document.getElementById('dateSelect').value = today;
   document.getElementById('startDate').value = today;

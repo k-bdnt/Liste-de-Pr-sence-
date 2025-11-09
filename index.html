@@ -1,202 +1,367 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔒 Accès Multi-Utilisateurs</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: linear-gradient(135deg, #e74c3c, #c0392b); 
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: #333;
-        }
-        .container {
-            background-color: rgba(255, 255, 255, 0.95);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            width: 380px;
-            max-width: 90%;
-            text-align: center;
-            transition: transform 0.5s ease-in-out;
-        }
-        .container.shake {
-            animation: shake 0.5s;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-            20%, 40%, 60%, 80% { transform: translateX(10px); }
-        }
-
-        h2 {
-            color: #2c3e50; 
-            margin-bottom: 25px;
-            font-size: 30px;
-            position: relative;
-        }
-        h2::after {
-            content: '';
-            position: absolute;
-            width: 70px;
-            height: 4px;
-            background-color: #e74c3c;
-            bottom: -15px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 2px;
-        }
-
-        p {
-            color: #555;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-
-        .input-group {
-            margin-bottom: 25px;
-            text-align: left;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 10px;
-            font-weight: bold;
-            color: #444;
-            font-size: 16px;
-        }
-        input[type="text"],
-        input[type="password"] {
-            width: calc(100% - 28px);
-            padding: 14px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 17px;
-            direction: ltr;
-            text-align: left;
-            transition: border-color 0.3s, box-shadow 0.3s;
-        }
-        input[type="text"]:focus,
-        input[type="password"]:focus {
-            border-color: #e74c3c;
-            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.3);
-            outline: none;
-        }
-
-        button {
-            background-color: #e74c3c;
-            color: white;
-            padding: 14px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 19px;
-            width: 100%;
-            font-weight: bold;
-            transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
-            letter-spacing: 0.8px;
-        }
-        button:hover {
-            background-color: #c0392b;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 15px rgba(231, 76, 60, 0.4);
-        }
-
-        #message {
-            margin-top: 30px;
-            font-weight: bold;
-            font-size: 17px;
-        }
-        .error {
-            color: #dc3545;
-            animation: fadeIn 0.5s;
-        }
-        .success {
-            color: #28a745; 
-            animation: fadeIn 0.5s;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Système de Gestion de Présence Avancé - V3.5 (Dashboard Live)</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div id="toast-notification"></div>
 
-<div class="container" id="loginForm">
-    <h2>🔑 Accès Sécurisé</h2>
-    <p>Veuillez entrer votre nom d'utilisateur et votre mot de passe pour continuer :</p>
+<header>
+    Système de Gestion de Présence
+</header>
+<main id="main">
+
+<div id="employees" class="tab-content-card">
+    <h2>🏠 Tableau de Bord (Aperçu du Jour)</h2>
     
-    <div class="input-group">
-        <label for="usernameInput">Nom d'utilisateur :</label>
-        <input type="text" id="usernameInput" placeholder="Votre nom d'utilisateur" required>
-    </div>
-
-    <div class="input-group">
-        <label for="passwordInput">Mot de passe :</label>
-        <input type="password" id="passwordInput" placeholder="************" required>
+    <div class="dashboard-section">
+        <h3>📊 Résumé du Jour <small id="currentDateDisplay" style="color: #6c757d; font-size: 0.9em; font-weight: normal;"></small></h3>
+        <div class="dashboard-summary-container">
+            <div class="kpi-card-dashboard green">
+                <h4>Employés Présents (Punch In Actif)</h4>
+                <span id="kpiPresentNow" class="kpi-value-dashboard">0</span>
+            </div>
+            <div class="kpi-card-dashboard red">
+                <h4>Absences Confirmées</h4>
+                <span id="kpiAbsencesToday" class="kpi-value-dashboard">0</span>
+            </div>
+            <div class="kpi-card-dashboard yellow">
+                <h4>Total Employés Enregistrés</h4>
+                <span id="kpiTotalWorkers" class="kpi-value-dashboard">0</span>
+            </div>
+        </div>
     </div>
     
-    <button onclick="checkCredentials()">Se Connecter</button>
-
-    <div id="message"></div>
+    <div class="dashboard-section">
+        <h3>🏃 Qui est présent maintenant? (Punch In Actif)</h3>
+        <ul id="presenceNowList">
+            </ul>
+    </div>
+    
+    <div class="dashboard-section" style="margin-top: 30px;">
+        <h3>⚠️ Actions En Attente (Saisies Non Clôturées)</h3>
+        <p style="color: #dc3545;">*Saisie **Entrée** des jours précédents sans **Sortie** enregistrée.</p>
+        <ul id="pendingActionsList">
+            </ul>
+    </div>
+    
+    <hr style="margin-top: 30px; margin-bottom: 30px;">
+    
+    <h2>📋 Gestion des Employés & Jours Fériés</h2>
+    <p style="border-bottom: 1px dashed #ccc; padding-bottom: 10px;">**Liste et gestion des employés:**</p>
+    <div class="input-group" style="display: block;">
+        <input type="text" id="workerName" placeholder="Nom complet de l'employé">
+        <input type="text" id="workerDepartment" placeholder="Département / Branche">
+        <div class="input-group" style="margin-top: 5px;">
+             <div><label for="defaultEntry">Entrée par défaut:</label><input type="time" id="defaultEntry" value="09:00"></div>
+            <div><label for="defaultExit">Sortie par défaut:</label><input type="time" id="defaultExit" value="17:00"></div>
+        </div>
+        <button onclick="addWorker()" style="margin-top: 5px;">Ajouter un employé</button>
+    </div>
+    <ul id="workerList" style="list-style-type: none; padding: 0;"></ul>
+    <p style="border-bottom: 1px dashed #ccc; padding: 15px 0 10px 0; margin-top: 20px;">**Gestion des jours fériés:**</p>
+    <div class="input-group" style="display: block;">
+        <input type="date" id="holidayDate" style="margin-bottom: 5px;">
+        <input type="text" id="holidayName" placeholder="Nom de la fête (ex: Noël)">
+        <button onclick="addHoliday()" style="margin-top: 5px; background-color: #007bff;">Ajouter un jour férié</button>
+    </div>
+    <ul id="holidayList" style="list-style-type: none; padding: 0;"></ul>
 </div>
 
-<script>
-    // **=======================================================**
-    // ** ! قائمة المستخدمين السرية هنا !                      **
-    // ** تم إضافة المستخدم test_1 بكلمة مرور test@123 بنجاح  **
-    // **=======================================================**
-    const USERS = [
-        { username: 'Khalid_Bdnt', password: 'Khalid@Bdnt1' }, 
-        { username: 'admin', password: 'secure_access_24' },   
-        { username: 'guest', password: '123456' },
-        { username: 'test_1', password: 'test@123' } // 🚨 المستخدم الجديد 🚨
-    ];
+<div id="register" class="tab-content-card hidden">
+    <h2>✍️ Saisie de Présence & Absences (Unifiée)</h2>
+    
+    <div class="quick-register-card">
+        <h3>⚡ Enregistrement Instantané (Punch In / Punch Out)</h3>
+        
+        <div class="custom-select-container" id="quickSelectContainer">
+            <button id="customQuickSelectButton" class="custom-select-button" onclick="toggleWorkerDropdown('quick')">
+                <span id="selectedWorkerCount">-- Sélectionner 0 Employé(s) --</span>
+                <i class="fas fa-caret-down"></i>
+            </button>
+            <div id="customQuickWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('quick')">
+                </div>
+        </div>
+        <select id="registerQuickWorkerSelect" multiple size="4">
+            <option value="" disabled>-- Sélectionnez votre nom --</option>
+        </select>
+        
+        <textarea id="taskNoteQuick" placeholder="Tâche(s) accomplie(s) / Note (Optionnel)"></textarea>
+        <div class="input-group" style="justify-content: space-between; gap: 10px;">
+            <button onclick="quickPunch('in')" style="flex: 1;"><i class="fas fa-arrow-circle-right"></i> ENTRÉE</button>
+            <button onclick="quickPunch('out')" style="flex: 1;"><i class="fas fa-arrow-circle-left"></i> SORTIE</button>
+        </div>
+        <p style="font-size: 0.9em; color: #777; margin-top: 15px;">L'heure actuelle est enregistrée automatiquement.</p>
+    </div>
+    <div style="margin-top: 25px; border-top: 1px dashed #ccc; padding-top: 15px;">
+        <h3>Résumé des entrées instantanées d'aujourd'hui:</h3>
+        <ul id="quickSummaryList" style="list-style-type: none; padding: 0;"></ul>
+    </div>
+    <hr style="margin-top: 30px; margin-bottom: 30px;">
+    <div class="manual-register-section">
+        <h3>🕰️ Saisie Manuelle ou Rétroactive</h3>
+        <div class="input-group">
+            <div><label for="workerSelect">Employé:</label><select id="workerSelect"><option value="" disabled selected>-- Sélectionner --</option></select></div>
+            <div><label for="dateSelect">Date:</label><input type="date" id="dateSelect"></div>
+        </div>
+        <div class="input-group">
+            <div><label for="entryTime">Heure d'Entrée:</label><input type="time" id="entryTime"></div>
+            <div><label for="exitTime">Heure de Sortie:</label><input type="time" id="exitTime"></div>
+        </div>
+        <div class="input-group">
+            <div><label for="breakStart">Début Pause (Optionnel):</label><input type="time" id="breakStart"></div>
+            <div><label for="breakEnd">Fin Pause (Optionnel):</label><input type="time" id="breakEnd"></div>
+        </div>
+        <textarea id="manualNote" placeholder="Tâches spécifiques ou note pour cette saisie (Optionnel)"></textarea>
+        <button id="registerButton" onclick="registerPresence()">Enregistrer la Présence</button>
+        <button onclick="clearForm()" style="background-color: #6c757d; margin-top: 5px;">Annuler / Nouveau Formulaire</button>
+    </div>
+    <hr style="margin-top: 30px; margin-bottom: 30px;">
+    <div class="absence-section">
+        <h3>❌ Gérer les Absences & Congés (Planifié ou pour un jour)</h3>
+        <div class="input-group">
+            <div><label for="absenceWorker">Employé:</label><select id="absenceWorker"><option value="" disabled selected>-- Sélectionner --</option></select></div>
+            <div><label for="absenceReason">Motif:</label><select id="absenceReason">
+                <option value="Maladie">Maladie</option><option value="Permission">Permission</option>
+                <option value="Conge_Annuel">Congé Annuel</option><option value="Autre">Autre</option>
+            </select></div>
+        </div>
+        <p style="margin-top: 15px; margin-bottom: 5px;">**Période de l'absence:**</p>
+        <div class="input-group">
+            <div><label for="startDate">Date Début:</label><input type="date" id="startDate"></div>
+            <div><label for="endDate">Date Fin (Même date si un seul jour):</label><input type="date" id="endDate"></div>
+        </div>
+        <button onclick="registerPlannedAbsence()" style="background-color: #d32f2f;">Planifier/Enregistrer l'Absence</button>
+        <p style="margin-top: 25px; border-top: 1px dashed #ddd; padding-top: 10px;">**Absences planifiées existantes:**</p>
+        <ul id="plannedAbsenceList" style="list-style-type: none; padding: 0;"></ul>
+    </div>
+</div>
 
-    function checkCredentials() {
-        const usernameInput = document.getElementById('usernameInput');
-        const passwordInput = document.getElementById('passwordInput');
-        const messageElement = document.getElementById('message');
-        const loginContainer = document.getElementById('loginForm');
+<div id="table" class="tab-content-card hidden">
+    <h2>📊 Tableau des Saisies</h2>
+    
+    <div class="filter-controls">
+        <h3><i class="fas fa-filter"></i> Filtres du Tableau</h3>
+        
+        <div class="filter-group period-filters">
+            <label style="margin-right: 15px;">Filtrer par Période:</label>
+            <div class="period-filter-dropdown-container">
+                 <button id="periodFilterButton" onclick="togglePeriodDropdown()">
+                    <i class="fas fa-calendar-alt"></i> 
+                    <span id="currentPeriodLabel">Toute la Période</span> 
+                    <i class="fas fa-caret-down"></i>
+                 </button>
+                 <div id="periodFilterDropdown" class="hidden">
+                    <div class="period-filter-option" data-filter="today" onclick="selectPeriodFilter('today')"><i class="fas fa-calendar-day" style="color:#28a745;"></i> Aujourd'hui</div>
+                    <div class="period-filter-option" data-filter="week" onclick="selectPeriodFilter('week')"><i class="fas fa-calendar-week" style="color:#ffc107;"></i> Cette Semaine</div>
+                    <div class="period-filter-option" data-filter="month" onclick="selectPeriodFilter('month')"><i class="fas fa-calendar-alt" style="color:#007bff;"></i> Ce Mois</div>
+                    <div class="period-filter-option active" data-filter="all" onclick="selectPeriodFilter('all')"><i class="fas fa-infinity" style="color:#6c757d;"></i> Toute la Période</div>
+                 </div>
+            </div>
+        </div>
 
-        const enteredUsername = usernameInput.value;
-        const enteredPassword = passwordInput.value;
-        let isAuthenticated = false;
+        <div class="filter-group" style="display: block;">
+            <label style="display: block; margin-bottom: 5px; margin-top: 10px;">Filtrer par Employés (Multi-sélection):</label>
+            <div class="custom-select-container" id="tableSelectContainer">
+                <button id="customTableSelectButton" class="custom-select-button" onclick="toggleWorkerDropdown('table')">
+                    <span id="selectedTableWorkerCount">-- Tous les employés (0) --</span>
+                    <i class="fas fa-caret-down"></i>
+                </button>
+                <div id="customTableWorkerSelectDropdown" class="custom-select-dropdown hidden" onmouseleave="closeWorkerDropdown('table')">
+                    </div>
+            </div>
+        </div>
+    </div>
 
-        messageElement.textContent = '';
-        messageElement.className = '';
-        loginContainer.classList.remove('shake');
+    <div class="sort-controls">
+        <h3><i class="fas fa-sort"></i> Options de Tri</h3>
+        <div class="sort-filter-dropdown-container">
+            <button id="sortFilterButton" onclick="toggleSortDropdown()">
+                <span id="currentSortLabel">Date (Récents)</span>
+                <i class="fas fa-caret-down"></i>
+            </button>
+            <div id="sortFilterDropdown" class="hidden">
+                 <div class="sort-filter-option active" data-column="date" data-direction="desc" onclick="selectSortOption('date', 'desc', 'Date (Récents)')"><i class="fas fa-sort-numeric-down"></i> Date (Récents)</div>
+                 <div class="sort-filter-option" data-column="date" data-direction="asc" onclick="selectSortOption('date', 'asc', 'Date (Anciens)')"><i class="fas fa-sort-numeric-up"></i> Date (Anciens)</div>
+                 <div class="sort-filter-option" data-column="hours" data-direction="desc" onclick="selectSortOption('hours', 'desc', 'Heures Net (Max)')"><i class="fas fa-sort-amount-down" style="color: #4CAF50;"></i> Heures Net (Max)</div>
+                 <div class="sort-filter-option" data-column="hours" data-direction="asc" onclick="selectSortOption('hours', 'asc', 'Heures Net (Min)')"><i class="fas fa-sort-amount-up" style="color: #4CAF50;"></i> Heures Net (Min)</div>
+            </div>
+        </div>
+    </div>
 
-        // البحث عن بيانات الدخول المدخلة في مصفوفة USERS
-        for (let i = 0; i < USERS.length; i++) {
-            if (enteredUsername === USERS[i].username && enteredPassword === USERS[i].password) {
-                isAuthenticated = true;
-                break; 
-            }
-        }
+    <div class="table-container"> 
+        <table id="presenceTable">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Nom</th>
+                    <th>Département</th>
+                    <th>Entrée</th>
+                    <th>Sortie</th>
+                    <th>Pause (min)</th>
+                    <th>H. Net</th>
+                    <th>Statut</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
 
-        if (isAuthenticated) {
-            messageElement.className = 'success';
-            messageElement.textContent = '✅ Connexion réussie ! Chargement du contenu...';
-            
-            setTimeout(() => {
-                // إعادة التوجيه إلى ملف contente.html
-                window.location.href = 'contente.html';
-                
-            }, 1000); 
-        } else {
-            messageElement.className = 'error';
-            messageElement.textContent = "❌ Nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer.";
-            usernameInput.value = ''; 
-            passwordInput.value = ''; 
-            usernameInput.focus(); 
-            loginContainer.classList.add('shake');
-        }
-    }
-</script>
+<div id="calendar" class="tab-content-card hidden">
+    <h2>📅 Calendrier de Présence (Cliquez sur un jour pour les détails)</h2>
+    <select id="calendarWorker" onchange="drawCalendar(currentYear, currentMonth)"><option value="all">Tous les employés</option></select>
+    <div class="calendar-controls">
+        <button onclick="prevMonth()" style="width: auto; background-color: #555;"><i class="fas fa-chevron-left"></i> Précédent</button>
+        <h3 id="monthYearDisplay"></h3>
+        <button onclick="nextMonth()" style="width: auto; background-color: #555;">Suivant <i class="fas fa-chevron-right"></i></button>
+    </div>
+    <div id="calendarDisplay" class="calendar month-view"></div>
+</div>
 
+<div id="reports" class="tab-content-card hidden">
+    <h2>📈 Analyse, Rapports & KPIs</h2>
+    <p>Sélectionnez un employé ou "Tous" pour filtrer les rapports:</p>
+    <select id="reportsWorkerSelect" onchange="calculateKPIs(); drawChart();">
+        <option value="all">Tous les employés</option>
+    </select>
+    
+    <div class="kpi-container" style="margin-top: 25px;">
+        <div class="kpi-card">
+            <h4>Taux d'Absence Global (Mois)</h4>
+            <span id="kpiAbsenceRate" class="kpi-value">--%</span>
+        </div>
+        <div class="kpi-card">
+            <h4>Moyenne H. Net par Jour (Mois)</h4>
+            <span id="kpiAvgHours" class="kpi-value">-- h</span>
+        </div>
+        <div class="kpi-card">
+            <h4>Total Heures Net (Mois)</h4>
+            <span id="kpiTotalHoursMonth" class="kpi-value">-- h</span>
+        </div>
+    </div>
+    
+    <h3 style="margin-top: 30px;">Synthèse de Performance Mensuelle par Employé</h3>
+    <div class="table-container">
+        <table id="monthlyReportTable" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>Employé</th>
+                    <th>Total Heures (Mois)</th>
+                    <th>Jours d'Absence</th>
+                    <th>Moy. Retard Entrée</th>
+                </tr>
+            </thead>
+            <tbody></tobody>
+        </table>
+    </div>
+
+    <h3 style="margin-top: 30px;">Graphique d'Heures de Travail par Employé</h3>
+    <canvas id="hoursChart" style="margin-top: 10px;"></canvas>
+</div>
+
+<div id="profile" class="tab-content-card hidden">
+    <h2>👤 Détails du Profil & Modification</h2>
+    <p>Sélectionnez un employé pour visualiser/modifier ses informations:</p>
+    <select id="profileWorkerSelect" onchange="loadWorkerProfile()"><option value="" disabled selected>Sélectionner un employé</option></select>
+    
+    <div id="workerProfileDetails" class="profile-details-card hidden" style="border: 1px solid #ccc; padding: 20px; border-radius: 8px; margin-top: 15px; background-color: #fcfcfc;">
+        <div class="profile-image-container">
+            <img id="profileImage" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z'/></svg>" alt="Image Profil">
+            <input type="file" id="profileImageUpload" accept="image/*" style="margin-top: 10px; width: auto; padding: 5px;" onchange="previewProfileImage(event)">
+        </div>
+        
+        <h3 style="margin-top: 15px;">⚙️ Informations de base</h3>
+        <label for="editName">Nom Complet:</label>
+        <input type="text" id="editName" placeholder="Nouveau Nom">
+        
+        <label for="editDept">Département:</label>
+        <input type="text" id="editDept" placeholder="Nouveau Département">
+        
+        <div class="input-group">
+            <div><label for="editEntry">Entrée par défaut:</label><input type="time" id="editEntry"></div>
+            <div><label for="editExit">Sortie par défaut:</label><input type="time" id="editExit"></div>
+        </div>
+        
+        <button onclick="saveWorkerProfile()" style="background-color: #4CAF50; margin-top: 15px;"><i class="fas fa-save"></i> Sauvegarder les Modifications</button>
+
+        <hr style="margin: 30px 0;">
+        
+        <h3 style="margin-top: 0;">🎯 Performance du Mois</h3>
+        
+        <div class="profile-kpi-container">
+            <div class="profile-kpi-card">
+                <h4><i class="fas fa-hourglass-half profile-icon" style="color:#007bff;"></i> Total Heures Net</h4>
+                <span id="profileTotalHours" class="profile-value">0.00h</span>
+            </div>
+            <div class="profile-kpi-card">
+                <h4><i class="fas fa-percentage profile-icon" style="color:#4CAF50;"></i> Taux de Punch</h4>
+                <span id="profilePunchRate" class="profile-value">--%</span>
+            </div>
+            <div class="profile-kpi-card">
+                <h4><i class="fas fa-calendar-times profile-icon" style="color:#dc3545;"></i> Jours d'Absence (Net)</h4>
+                <span id="profileAbsenceDays" class="profile-value">0</span>
+            </div>
+             <div class="profile-kpi-card">
+                <h4><i class="fas fa-stopwatch profile-icon" style="color:#FFC107;"></i> Jours de Retard</h4>
+                <span id="profileLatenessDays" class="profile-value">0</span> 
+            </div>
+        </div>
+
+        <hr style="margin: 30px 0;">
+
+        <h3 style="margin-top: 0;">📈 Analyse d'Assiduité (Mois Actuel)</h3>
+        <div style="width: 100%; max-width: 300px; margin: 15px auto;">
+            <canvas id="profileAttendanceChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<div id="export" class="tab-content-card hidden">
+    <h2>💾 Exportation et Sauvegarde</h2>
+    <p>Utilisez ces boutons pour sauvegarder vos données ou les exporter au format Excel (.xlsx).</p>
+    <button onclick="exportDataToExcel('all')" style="background-color: #1e7e34;"><i class="fas fa-file-excel"></i> Exporter TOUTES les Saisies (Excel)</button>
+    <p style="margin-top: 20px;">**Sauvegarde de la configuration actuelle:**</p>
+    <button onclick="backupData()" style="background-color: #555;"><i class="fas fa-cloud-download-alt"></i> Sauvegarder (Télécharger le JSON)</button>
+    <p style="margin-top: 20px;">**Restaurer les données:**</p>
+    <input type="file" id="restoreFile" accept=".json" style="margin-bottom: 10px;">
+    <button onclick="restoreData()" style="background-color: #dc3545;"><i class="fas fa-upload"></i> Restaurer (Importer le JSON)</button>
+</div>
+
+</main>
+
+<div class="tab-navigation">
+    <button class="tab-button active" onclick="openTab(event, 'employees')"><i class="fas fa-home"></i> Accueil</button>
+    <button class="tab-button" onclick="openTab(event, 'register')"><i class="fas fa-sign-in-alt"></i> Saisie</button>
+    <button class="tab-button" onclick="openTab(event, 'table')"><i class="fas fa-list-alt"></i> Tableau</button>
+    <button class="tab-button" onclick="openTab(event, 'calendar')"><i class="fas fa-calendar-alt"></i> Calendrier</button>
+    <button class="tab-button" onclick="openTab(event, 'reports')"><i class="fas fa-chart-line"></i> Rapports</button>
+    <button class="tab-button" onclick="openTab(event, 'profile')"><i class="fas fa-user-circle"></i> Profil</button>
+    <button class="tab-button" onclick="openTab(event, 'export')"><i class="fas fa-file-export"></i> Export</button>
+</div>
+
+<div id="dayDetailsModal" class="modal" onclick="if(event.target === this) closeModal()">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">&times;</span>
+        <h3 id="modalDateTitle"></h3>
+        <p style="font-weight: bold;" id="modalHolidayInfo"></p>
+        <hr>
+        <h4>Détails de Présence/Absence:</h4>
+        <ul id="modalDetailsList" style="list-style-type: none; padding: 0;">
+            </ul>
+    </div>
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="app.js"></script>
 </body>
 </html>

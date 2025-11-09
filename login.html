@@ -6,7 +6,6 @@
     <title>Accès Restreint - Authentification</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* تعريف المتغيرات لتسهيل تغيير اللون الأحمر */
         :root {
             --primary-red: #cc0000; 
             --dark-red: #a30000; 
@@ -26,7 +25,6 @@
             color: var(--text-color);
         }
 
-        /* تصميم بطاقة الدخول */
         .login-container {
             background-color: #ffffff;
             padding: 40px;
@@ -45,7 +43,6 @@
             font-weight: 700;
         }
         
-        /* حقول الإدخال */
         .form-group {
             margin-bottom: 20px;
             text-align: left;
@@ -76,7 +73,6 @@
             outline: none;
         }
 
-        /* الزر */
         button {
             background-color: var(--primary-red);
             color: white;
@@ -95,12 +91,11 @@
             background-color: var(--dark-red);
         }
 
-        /* رسالة الخطأ/النجاح */
         #message {
             margin-top: 20px;
             font-weight: 600;
             font-size: 14px;
-            height: 20px;
+            height: 40px;
         }
         .error {
             color: var(--primary-red);
@@ -130,11 +125,26 @@
     </div>
 
     <script>
-        // *** قائمة المستخدمين وكلمات المرور المسموح بها ***
+        // **********************************************************************
+        // *** قائمة المستخدمين المشغلة (7 حسابات) ***
+        // **********************************************************************
         const USERS = {
-            "utilisateur123": "monmotdepassesecurise",
-            "Khalid_bdnt": "Khalid123"
+            // المستخدمون السابقون:
+            "guest": "guest1",
+            "Khalid_bdnt": "Khalid123",
+
+            // 🔥 المستخدمون الجدد: 🔥
+            "Admin_Master": "Securite2025", 
+            "User_Aisha": "Aisha#2024",
+            "Dev_Omar": "OmarDev99",
+            "Guest_Viewer": "PassView",
+            "Support_Tech": "HelpMe2025"
         };
+        // ----------------------------------------------------------------------
+
+        // 🔥🔥🔥 مفتاح التحكم: (false) يعني أن الدخول مُفعَّل وجاهز للعمل 🔥🔥🔥
+        const IS_LOGIN_DISABLED = false; // قم بتعيينه على **true** إذا أردت التعطيل للتعديل
+        // ----------------------------------------------------------------------
 
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -147,19 +157,24 @@
             messageElement.className = '';
 
             // التحقق
-            if (USERS[usernameInput] === passwordInput) {
-                // Connexion réussie
+            if (!IS_LOGIN_DISABLED && USERS[usernameInput] === passwordInput) {
+                // الدخول الناجح
                 messageElement.textContent = "Connexion réussie ! Redirection en cours...";
                 messageElement.classList.add('success'); 
                 
-                // *** التوجيه الآن إلى index.html (الصفحة المحمية) ***
+                // التوجيه إلى index.html
                 setTimeout(() => {
                     window.location.href = 'index.html'; 
                 }, 1500); 
 
             } else {
-                // Échec de la connexion 
-                messageElement.textContent = "Nom d'utilisateur ou mot de passe incorrect.";
+                // فشل الدخول أو تعطيل الكود
+                let msg = "Nom d'utilisateur ou mot de passe incorrect.";
+                if (IS_LOGIN_DISABLED) {
+                    msg = "Nom d'utilisateur ou mot de passe incorrect. (تم تعطيل الدخول حالياً للتعديل)";
+                }
+
+                messageElement.textContent = msg;
                 messageElement.classList.add('error'); 
                 document.getElementById('password').value = ''; 
             }

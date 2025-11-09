@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔒 Accès Restreint - Khalid Bdnt</title>
+    <title>🔒 Accès Multi-Utilisateurs</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
@@ -146,11 +146,15 @@
 
 <script>
     // **=======================================================**
-    // ** ! Les identifiants secrets sont ici !         **
-    // ** Nom d'utilisateur: Khalid_Bdnt, Mot de passe: Khalid@Bdnt1 **
+    // ** ! قائمة المستخدمين السرية هنا !                      **
+    // ** تم إضافة المستخدم test_1 بكلمة مرور test@123 بنجاح  **
     // **=======================================================**
-    const CORRECT_USERNAME = 'Khalid_Bdnt'; 
-    const CORRECT_PASSWORD = 'Khalid@Bdnt1'; 
+    const USERS = [
+        { username: 'Khalid_Bdnt', password: 'Khalid@Bdnt1' }, 
+        { username: 'admin', password: 'secure_access_24' },   
+        { username: 'guest', password: '123456' },
+        { username: 'test_1', password: 'test@123' } // 🚨 المستخدم الجديد 🚨
+    ];
 
     function checkCredentials() {
         const usernameInput = document.getElementById('usernameInput');
@@ -160,17 +164,26 @@
 
         const enteredUsername = usernameInput.value;
         const enteredPassword = passwordInput.value;
+        let isAuthenticated = false;
 
         messageElement.textContent = '';
         messageElement.className = '';
         loginContainer.classList.remove('shake');
 
-        if (enteredUsername === CORRECT_USERNAME && enteredPassword === CORRECT_PASSWORD) {
+        // البحث عن بيانات الدخول المدخلة في مصفوفة USERS
+        for (let i = 0; i < USERS.length; i++) {
+            if (enteredUsername === USERS[i].username && enteredPassword === USERS[i].password) {
+                isAuthenticated = true;
+                break; 
+            }
+        }
+
+        if (isAuthenticated) {
             messageElement.className = 'success';
             messageElement.textContent = '✅ Connexion réussie ! Chargement du contenu...';
             
             setTimeout(() => {
-                // 🚀 إعادة التوجيه إلى ملف المحتوى 🚀
+                // إعادة التوجيه إلى ملف contente.html
                 window.location.href = 'contente.html';
                 
             }, 1000); 

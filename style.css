@@ -1,19 +1,19 @@
 /* ==================== 1. نظام الألوان والمتغيرات ==================== */
 :root {
-    /* ☀️ الوضع الفاتح الافتراضي */
-    --primary-color: #007BFF; /* أزرق أساسي */
-    --secondary-color: #6C757D; /* رمادي ثانوي */
-    --success-color: #28A745; /* أخضر */
-    --danger-color: #DC3545; /* أحمر */
-    --card-bg: #FFFFFF; /* خلفية البطاقات */
-    --background-color: #f4f7f6; /* خلفية الصفحة */
-    --text-color: #333333; /* لون النص الرئيسي */
-    --border-color: #DDDDDD; /* لون الحدود الخفيفة */
+    /* ☀️ Thème Clair (Rouge) */
+    --primary-color: #DC3545;   /* Rouge principal */
+    --secondary-color: #6C757D;
+    --success-color: #28A745;
+    --danger-color: #DC3545;
+    --card-bg: #FFFFFF; 
+    --background-color: #f4f7f6; 
+    --text-color: #333333; 
+    --border-color: #DDDDDD; 
 }
 
-/* 🌙 الوضع الداكن */
+/* 🌙 Thème Sombre (Rouge) */
 [data-theme='dark'] {
-    --primary-color: #4A90E2; 
+    --primary-color: #FF5252; /* Rouge plus clair pour le contraste */
     --secondary-color: #A9B3BB;
     --success-color: #69F0AE;
     --danger-color: #FF5252;
@@ -23,22 +23,22 @@
     --border-color: #3A4753; 
 }
 
-/* ==================== 2. إعادة تعيين وتنسيق عام ==================== */
+/* ==================== 2. Réinitialisation et Style Général ==================== */
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    direction: rtl; 
+    direction: rtl; /* Garder RTL pour l'instant, mais la langue sera française */
 }
 
 body {
-    /* تطبيق المتغيرات للتبديل بين الوضعين */
+    /* Application des variables */
     background-color: var(--background-color);
     color: var(--text-color);
     padding-bottom: 70px;
     font-family: 'Arial', sans-serif;
-    transition: background-color 0.3s, color 0.3s; /* لتنعيم التبديل */
+    transition: background-color 0.3s, color 0.3s; 
 }
 
 header {
@@ -49,7 +49,7 @@ header {
     font-size: 1.5em;
     font-weight: bold;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    position: relative; /* لتثبيت زر الوضع الداكن */
+    position: relative; 
 }
 
 main {
@@ -60,17 +60,17 @@ main {
     display: none !important;
 }
 
-/* ==================== 3. أنماط التبويبات والبطاقات ==================== */
+/* ==================== 3. Onglets et Cartes ==================== */
 .tab-content-card {
     background-color: var(--card-bg);
     padding: 25px; 
     border-radius: 15px; 
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); /* ظل واضح */
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15); 
     margin-top: 20px;
     transition: background-color 0.3s;
 }
 
-/* ==================== 4. شريط التنقل السفلي ==================== */
+/* ==================== 4. Barre de Navigation Inférieure ==================== */
 .tab-navigation {
     position: fixed;
     bottom: 0;
@@ -107,11 +107,10 @@ main {
 .tab-button.active {
     color: var(--primary-color);
     border-bottom: 3px solid var(--primary-color);
-    /* لون خلفية خفيف للزر النشط في الوضع الفاتح/الداكن */
     background-color: color-mix(in srgb, var(--primary-color) 8%, var(--card-bg)); 
 }
 
-/* ==================== 5. التفاعل مع الأزرار والإدخال ==================== */
+/* ==================== 5. Boutons et Entrées ==================== */
 input[type="text"], input[type="date"], input[type="time"], select, textarea {
     width: 100%;
     padding: 10px;
@@ -120,7 +119,7 @@ input[type="text"], input[type="date"], input[type="time"], select, textarea {
     border-radius: 6px;
     font-size: 1em;
     background-color: var(--card-bg);
-    color: var(--text-color); /* لون نص الإدخال يتغير */
+    color: var(--text-color); 
     transition: border-color 0.3s;
 }
 
@@ -139,7 +138,7 @@ button {
     font-weight: bold; 
     transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
-    background-color: #555; /* لون افتراضي (سيتم override من خلال JS/HTML) */
+    background-color: #555; 
 }
 
 button:hover {
@@ -148,7 +147,7 @@ button:hover {
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15); 
 }
 
-/* ألوان الأزرار الرئيسية */
+/* Couleurs des boutons principaux */
 button[onclick*="addWorker"], button[onclick*="registerPresence"] {
     background-color: var(--primary-color);
 }
@@ -161,21 +160,16 @@ button[onclick*="addWorker"], button[onclick*="registerPresence"] {
 }
 
 
-/* ==================== 6. أنماط الجدول ==================== */
+/* ==================== 6. Styles du Tableau ==================== */
 .table-container {
     overflow-x: auto;
     margin-top: 20px;
     border-radius: 8px;
     border: 1px solid var(--border-color);
 }
-#presenceTable, #monthlyReportTable {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 0.9em;
-}
 
 #presenceTable th, #monthlyReportTable th {
-    background-color: var(--border-color); /* لون رأس الجدول يستخدم لون الحدود */
+    background-color: var(--border-color); 
     color: var(--text-color);
     padding: 12px 8px;
     text-align: right;
@@ -188,7 +182,7 @@ button[onclick*="addWorker"], button[onclick*="registerPresence"] {
     text-align: right;
 }
 
-/* Zebra Striping (تظليل السطور المتناوبة) */
+/* Lignes alternées (Zebra Striping) */
 #presenceTable tbody tr:nth-child(odd) {
     background-color: var(--background-color); 
 }
@@ -198,24 +192,13 @@ button[onclick*="addWorker"], button[onclick*="registerPresence"] {
     cursor: pointer;
 }
 
-/* ==================== 7. أنماط الإدارة وقوائم الموظفين ==================== */
+/* ==================== 7. Styles divers ==================== */
 .worker-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    border-bottom: 1px dashed var(--border-color);
     background-color: color-mix(in srgb, var(--card-bg), var(--background-color) 5%);
-    margin-top: 5px;
-    border-radius: 4px;
-}
-.worker-item:last-child {
-    border-bottom: none;
+    border-bottom: 1px dashed var(--border-color);
 }
 
-/* ==================== 8. أنماط الإشعارات (Toast) ==================== */
 #toast-notification {
-    /* ... (باقي أنماط Toast) ... */
     background-color: var(--primary-color);
     color: white;
 }
@@ -225,5 +208,3 @@ button[onclick*="addWorker"], button[onclick*="registerPresence"] {
 #toast-notification.success {
     background-color: var(--success-color);
 }
-
-/* ... (باقي الأنماط الأخرى مثل KPI و Calendar) ... */
